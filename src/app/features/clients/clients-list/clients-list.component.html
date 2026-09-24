@@ -1,0 +1,114 @@
+<div class="page">
+  <header class="page__header">
+    <div>
+      <h1>Clients</h1>
+      <p class="text-muted">Portefeuille clients B2B</p>
+    </div>
+    @if (canWrite()) {
+      <a routerLink="/clients/nouveau" class="btn btn--primary">+ Nouveau client</a>
+    }
+  </header>
+
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field">
+        <label for="search">Recherche</label>
+        <input
+          id="search"
+          type="search"
+          [(ngModel)]="search"
+          (keyup.enter)="onSearch()"
+          placeholder="N°, nom, téléphone, email…"
+        />
+      </div>
+      <div class="filters__field">
+        <label for="ville">Ville</label>
+        <input id="ville" type="text" [(ngModel)]="ville" (keyup.enter)="onSearch()" placeholder="Antananarivo…" />
+      </div>
+      <label class="filters__check">
+        <input type="checkbox" [(ngModel)]="inclureSommeil" (change)="onSearch()" />
+        Inclure sommeil
+      </label>
+      <div class="filters__actions">
+        <button type="button" class="btn btn--primary" (click)="onSearch()" [disabled]="loading()">
+          Rechercher
+        </button>
+        <button type="button" class="btn btn--ghost" (click)="clearFilters()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
+  }
+
+  <div class="card table-card">
+    @if (loading()) {
+      <p class="table-card__state">Chargement…</p>
+    } @else if (items().length === 0) {
+      <p class="table-card__state text-muted">Aucun client trouvé.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Intitulé</th>
+              <th>Ville</th>
+              <th>Téléphone</th>
+              <th>Encours</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of items(); track c.numero) {
+              <tr [class.is-sommeil]="c.sommeil">
+                <td>
+                  <a [routerLink]="['/clients', c.numero]" class="link-strong">{{ c.numero }}</a>
+                </td>
+                <td>{{ c.intitule }}</td>
+                <td>{{ c.ville || '—' }}</td>
+                <td>{{ c.telephone || '—' }}</td>
+                <td class="num" [class.text-danger]="(c.encours ?? 0) > 0">
+                  {{ c.encours != null ? (c.encours | number: '1.0-0') : '—' }}
+                </td>
+                <td>
+                  @if (c.sommeil) {
+                    <span class="badge badge--muted">Sommeil</span>
+                  } @else if ((c.encours ?? 0) > 0) {
+                    <span class="badge badge--warn">À crédit</span>
+                  } @else {
+                    <span class="badge badge--ok">Actif</span>
+                  }
+                </td>
+                <td class="actions">
+                  <a [routerLink]="['/clients', c.numero]" class="btn btn--ghost btn--sm">Voir</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="pager">
+        <span class="text-muted">
+          {{ total() }} client{{ total() > 1 ? 's' : '' }} — page {{ page() }} / {{ totalPages() || 1 }}
+        </span>
+        <div class="pager__btns">
+          <button type="button" class="btn btn--ghost btn--sm" (click)="prevPage()" [disabled]="page() <= 1">
+            Précédent
+          </button>
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            (click)="nextPage()"
+            [disabled]="page() >= totalPages()"
+          >
+            Suivant
+          </button>
+        </div>
+      </footer>
+    }
+  </div>
+</div>
