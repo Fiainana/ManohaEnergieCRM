@@ -1,0 +1,103 @@
+<div class="page">
+  <a routerLink="/clients" class="back-link">← Retour aux clients</a>
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  } @else if (client(); as c) {
+    <header class="page__header">
+      <div>
+        <p class="page__code">{{ c.numero }}</p>
+        <h1>{{ c.intitule }}</h1>
+        <div class="page__badges">
+          @if (c.sommeil) {
+            <span class="badge badge--muted">Sommeil</span>
+          } @else if ((c.encours ?? 0) > 0) {
+            <span class="badge badge--warn">À crédit</span>
+          } @else {
+            <span class="badge badge--ok">Actif</span>
+          }
+        </div>
+      </div>
+      @if (canWrite()) {
+        <a [routerLink]="['/clients', c.numero, 'modifier']" class="btn btn--primary">Modifier</a>
+      }
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Coordonnées</h2>
+        <dl class="dl">
+          <div><dt>Adresse</dt><dd>{{ c.adresse || '—' }}</dd></div>
+          <div><dt>Complément</dt><dd>{{ c.complement || '—' }}</dd></div>
+          <div><dt>Code postal</dt><dd>{{ c.codePostal || '—' }}</dd></div>
+          <div><dt>Ville</dt><dd>{{ c.ville || '—' }}</dd></div>
+          <div><dt>Pays</dt><dd>{{ c.pays || '—' }}</dd></div>
+          <div><dt>Téléphone</dt><dd>{{ c.telephone || '—' }}</dd></div>
+          <div><dt>Email</dt><dd>{{ c.email || '—' }}</dd></div>
+          <div><dt>SIRET / ID</dt><dd>{{ c.siret || c.identifiant || '—' }}</dd></div>
+          <div><dt>Représentant</dt><dd>{{ c.representant || '—' }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>Crédit</h2>
+        <dl class="dl">
+          <div>
+            <dt>Encours</dt>
+            <dd [class.text-danger]="(c.encours ?? 0) > 0">
+              {{ c.encours != null ? (c.encours | number: '1.0-0') : '—' }}
+            </dd>
+          </div>
+          <div>
+            <dt>À crédit</dt>
+            <dd>{{ c.aCredit || (c.encours ?? 0) > 0 ? 'Oui' : 'Non' }}</dd>
+          </div>
+          <div>
+            <dt>Facturation libre</dt>
+            <dd>
+              {{ c.credit?.peutFacturerSansAdmin !== false && !(c.encours && c.encours > 0) && !c.sommeil
+                ? 'Oui'
+                : 'Validation admin possible' }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <section class="card factures">
+      <h2>Dernières factures</h2>
+      @if (factures().length === 0) {
+        <p class="text-muted">Aucune facture récente.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pièce</th>
+                <th>Date</th>
+                <th>Réf.</th>
+                <th>TTC</th>
+                <th>Reste</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of factures(); track f.numeroPiece) {
+                <tr>
+                  <td>{{ f.numeroPiece }}</td>
+                  <td>{{ f.dateDocument ? (f.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td>{{ f.reference || '—' }}</td>
+                  <td class="num">{{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') : '—' }}</td>
+                  <td class="num" [class.text-danger]="(f.resteAPayer ?? 0) > 0">
+                    {{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>
