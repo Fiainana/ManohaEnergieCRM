@@ -1,0 +1,99 @@
+<div class="page">
+  <a [routerLink]="isEdit() ? ['/clients', numero()] : '/clients'" class="back-link">← Retour</a>
+
+  <header class="page__header">
+    <h1>{{ isEdit() ? 'Modifier le client' : 'Nouveau client' }}</h1>
+  </header>
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else {
+    @if (error()) {
+      <div class="alert alert--error" role="alert">{{ error() }}</div>
+    }
+
+    <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form__grid">
+        <div class="field">
+          <label for="numero">N° client</label>
+          <input id="numero" formControlName="numero" placeholder="Auto si vide" maxlength="17" />
+          <span class="field__hint">Optionnel à la création (numérotation auto)</span>
+        </div>
+
+        <div class="field field--wide" [class.field--invalid]="form.controls.intitule.invalid && form.controls.intitule.touched">
+          <label for="intitule">Intitulé *</label>
+          <input id="intitule" formControlName="intitule" maxlength="69" />
+        </div>
+
+        <div class="field field--wide">
+          <label for="adresse">Adresse</label>
+          <input id="adresse" formControlName="adresse" maxlength="35" />
+        </div>
+
+        <div class="field field--wide">
+          <label for="complement">Complément</label>
+          <input id="complement" formControlName="complement" maxlength="35" />
+        </div>
+
+        <div class="field">
+          <label for="codePostal">Code postal</label>
+          <input id="codePostal" formControlName="codePostal" maxlength="9" />
+        </div>
+
+        <div class="field">
+          <label for="ville">Ville</label>
+          <input id="ville" formControlName="ville" maxlength="35" />
+        </div>
+
+        <div class="field">
+          <label for="pays">Pays</label>
+          <input id="pays" formControlName="pays" maxlength="35" />
+        </div>
+
+        <div class="field">
+          <label for="telephone">Téléphone</label>
+          <input id="telephone" formControlName="telephone" maxlength="21" />
+        </div>
+
+        <div class="field">
+          <label for="telecopie">Télécopie</label>
+          <input id="telecopie" formControlName="telecopie" maxlength="21" />
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" formControlName="email" maxlength="69" />
+        </div>
+
+        <div class="field">
+          <label for="siret">SIRET</label>
+          <input id="siret" formControlName="siret" maxlength="25" />
+        </div>
+
+        <div class="field">
+          <label for="identifiant">Identifiant</label>
+          <input id="identifiant" formControlName="identifiant" maxlength="25" />
+        </div>
+
+        <div class="field">
+          <label for="representantCode">Code représentant</label>
+          <input id="representantCode" formControlName="representantCode" maxlength="35" />
+        </div>
+
+        @if (isEdit()) {
+          <label class="field field--check">
+            <input type="checkbox" formControlName="sommeil" />
+            Client en sommeil
+          </label>
+        }
+      </div>
+
+      <div class="form__actions">
+        <a [routerLink]="isEdit() ? ['/clients', numero()] : '/clients'" class="btn btn--ghost">Annuler</a>
+        <button type="submit" class="btn btn--primary" [disabled]="saving() || form.invalid">
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
