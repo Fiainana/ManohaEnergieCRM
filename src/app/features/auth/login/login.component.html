@@ -14,8 +14,8 @@
           <path d="M24 24v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#0d9488"/>
-              <stop offset="1" stop-color="#0369a1"/>
+              <stop stop-color="#DC2626"/>
+              <stop offset="1" stop-color="#991B1B"/>
             </linearGradient>
           </defs>
         </svg>
@@ -23,13 +23,14 @@
       <h1 class="login-brand__title">{{ appName }}</h1>
       <p class="login-brand__tagline">
         Gestion commerciale & relation client<br />
-        connectée à Sage 100
+        pour les équipes Manoha Énergie
       </p>
       <ul class="login-brand__points">
         <li>Clients & portefeuille</li>
         <li>Devis & facturation</li>
         <li>Suivi commercial temps réel</li>
       </ul>
+      <p class="login-brand__powered">Powered by <strong>Aikflow</strong></p>
     </aside>
 
     <form class="login-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -113,7 +114,8 @@
       </button>
 
       <p class="login-card__footer">
-        Accès réservé aux collaborateurs Manoha Énergie
+        Accès réservé aux collaborateurs Manoha Énergie<br />
+        <span class="login-card__powered">Powered by <strong>Aikflow</strong></span>
       </p>
     </form>
   </div>
