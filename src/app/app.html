@@ -1,0 +1,340 @@
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
+<!-- * * * * * * * to get started with your project! * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+<style>
+  :host {
+    --bright-blue: oklch(51.01% 0.274 263.83);
+    --electric-violet: oklch(53.18% 0.311 303.85);
+    --french-violet: oklch(47.66% 0.246 305.88);
+    --vivid-pink: oklch(69.02% 0.277 332.77);
+    --hot-red: oklch(61.42% 0.238 15.34);
+    --orange-red: oklch(63.32% 0.24 31.68);
+
+    --gray-900: oklch(19.37% 0.006 300.98);
+    --gray-700: oklch(36.98% 0.014 302.71);
+    --gray-400: oklch(70.9% 0.015 304.04);
+
+    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
+      180deg,
+      var(--orange-red) 0%,
+      var(--vivid-pink) 50%,
+      var(--electric-violet) 100%
+    );
+
+    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
+      90deg,
+      var(--orange-red) 0%,
+      var(--vivid-pink) 50%,
+      var(--electric-violet) 100%
+    );
+
+    --pill-accent: var(--bright-blue);
+
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    font-size: 3.125rem;
+    color: var(--gray-900);
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: -0.125rem;
+    margin: 0;
+    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol";
+  }
+
+  p {
+    margin: 0;
+    color: var(--gray-700);
+  }
+
+  main {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: inherit;
+    position: relative;
+  }
+
+  .angular-logo {
+    max-width: 9.2rem;
+  }
+
+  .content {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 3rem;
+  }
+
+  .content h1 {
+    margin-top: 1.75rem;
+  }
+
+  .content p {
+    margin-top: 1.5rem;
+  }
+
+  .divider {
+    width: 1px;
+    background: var(--red-to-pink-to-purple-vertical-gradient);
+    margin-inline: 0.5rem;
+  }
+
+  .pill-group {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    --pill-accent: var(--bright-blue);
+    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
+    color: var(--pill-accent);
+    padding-inline: 0.75rem;
+    padding-block: 0.375rem;
+    border-radius: 2.75rem;
+    border: 0;
+    transition: background 0.3s ease;
+    font-family: var(--inter-font);
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.4rem;
+    letter-spacing: -0.00875rem;
+    text-decoration: none;
+  }
+
+  .pill:hover {
+    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
+  }
+
+  .pill-group .pill:nth-child(6n + 1) {
+    --pill-accent: var(--bright-blue);
+  }
+  .pill-group .pill:nth-child(6n + 2) {
+    --pill-accent: var(--electric-violet);
+  }
+  .pill-group .pill:nth-child(6n + 3) {
+    --pill-accent: var(--french-violet);
+  }
+  .pill-group .pill:nth-child(6n + 4) {
+    --pill-accent: var(--vivid-pink);
+  }
+  .pill-group .pill:nth-child(6n + 5),
+  .pill-group .pill:nth-child(6n + 6) {
+    --pill-accent: var(--hot-red);
+  }
+
+  .pill-group svg {
+    margin-inline-start: 0.25rem;
+  }
+
+  .social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.73rem;
+    margin-top: 1.5rem;
+  }
+
+  .social-links path {
+    transition: fill 0.3s ease;
+    fill: var(--gray-400);
+  }
+
+  .social-links a:hover svg path {
+    fill: var(--gray-900);
+  }
+
+  .social-links a:hover svg path:last-child {
+    fill: var(--hot-red);
+  }
+
+  /* Responsive styles */
+  @media screen and (max-width: 650px) {
+    .content {
+      flex-direction: column;
+      width: max-content;
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background: var(--red-to-pink-to-purple-horizontal-gradient);
+      margin-block: 1.5rem;
+    }
+  }
+</style>
+
+<main class="main">
+  <div class="content">
+    <div class="left-side">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 982 239"
+        fill="none"
+        class="angular-logo"
+      >
+        <g clip-path="url(#a)">
+          <path
+            fill="url(#b)"
+            d="M388.676 191.625h30.849L363.31 31.828h-34.758l-56.215 159.797h30.848l13.174-38.042h56.358l13.359 38.042Zm-65.461-62.534-32.698-94.977h2.079l32.776 94.977h-2.157Zm176.013-34.607c0 24.974-17.384 41.596-45.433 41.596-27.56 0-44.866-16.623-44.866-41.596 0-25.451 17.385-41.675 45.356-41.675 27.56 0 44.943 16.224 44.943 41.675Zm-30.849 0c0-14.122-8.467-22.776-14.849-22.776-6.382 0-14.849 8.654-14.849 22.776 0 14.122 8.467 22.776 14.849 22.776 6.382 0 14.849-8.654 14.849-22.776Zm81.337 13.174h28.22l-46.777 144.68h-30.849l46.777-144.68h2.629Zm68.664 145.345c-22.776 0-40.07-15.706-40.07-40.281 0-24.632 17.305-40.28 40.07-40.28 22.776 0 40.07 15.648 40.07 40.28 0 24.575-17.294 40.281-40.07 40.281Zm0-16.224c14.122 0 22.776-8.467 22.776-24.057 0-15.706-8.654-24.058-22.776-24.058-14.122 0-22.776 8.352-22.776 24.058 0 15.59 8.654 24.057 22.776 24.057Zm68.664 16.224c-22.776 0-40.07-15.706-40.07-40.281 0-24.632 17.305-40.28 40.07-40.28 22.776 0 40.07 15.648 40.07 40.28 0 24.575-17.294 40.281-40.07 40.281Zm0-16.224c14.122 0 22.776-8.467 22.776-24.057 0-15.706-8.654-24.058-22.776-24.058-14.122 0-22.776 8.352-22.776 24.058 0 15.59 8.654 24.057 22.776 24.057Z"
+          />
+          <path
+            fill="#DD0031"
+            d="M84.31 191.775h34.323L64.426 31.965H29.738l-56.215 159.81h34.323l13.174-38.042h56.358l13.359 38.042ZM18.849 129.241l-32.698-94.977h2.079l32.776 94.977h-2.157Zm176.013-34.607c0 24.974-17.384 41.596-45.433 41.596-27.56 0-44.866-16.623-44.866-41.596 0-25.451 17.385-41.675 45.356-41.675 27.56 0 44.943 16.224 44.943 41.675Zm-30.849 0c0-14.122-8.467-22.776-14.849-22.776-6.382 0-14.849 8.654-14.849 22.776 0 14.122 8.467 22.776 14.849 22.776 6.382 0 14.849-8.654 14.849-22.776Zm81.337 13.174h28.22l-46.777 144.68h-30.849l46.777-144.68h2.629Zm68.664 145.345c-22.776 0-40.07-15.706-40.07-40.281 0-24.632 17.305-40.28 40.07-40.28 22.776 0 40.07 15.648 40.07 40.28 0 24.575-17.294 40.281-40.07 40.281Zm0-16.224c14.122 0 22.776-8.467 22.776-24.057 0-15.706-8.654-24.058-22.776-24.058-14.122 0-22.776 8.352-22.776 24.058 0 15.59 8.654 24.057 22.776 24.057Zm68.664 16.224c-22.776 0-40.07-15.706-40.07-40.281 0-24.632 17.305-40.28 40.07-40.28 22.776 0 40.07 15.648 40.07 40.28 0 24.575-17.294 40.281-40.07 40.281Zm0-16.224c14.122 0 22.776-8.467 22.776-24.057 0-15.706-8.654-24.058-22.776-24.058-14.122 0-22.776 8.352-22.776 24.058 0 15.59 8.654 24.057 22.776 24.057Z"
+          />
+        </g>
+        <defs>
+          <linearGradient
+            id="b"
+            x1="0"
+            x2="982"
+            y1="192"
+            y2="192"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#DD0031" />
+            <stop offset="0.5" stop-color="#C3002F" />
+            <stop offset="1" stop-color="#DD0031" />
+          </linearGradient>
+          <clipPath id="a">
+            <path fill="#fff" d="M0 0h982v239H0z" />
+          </clipPath>
+        </defs>
+      </svg>
+      <h1>Hello, {{ title }}</h1>
+      <p>Congratulations! Your app is running. 🎉</p>
+    </div>
+    <div class="divider" role="separator" aria-label="Divider"></div>
+    <div class="right-side">
+      <div class="pill-group">
+        <a
+          class="pill"
+          href="https://angular.dev"
+          target="_blank"
+          rel="noopener"
+        >
+          Explore the Docs
+        </a>
+        <a
+          class="pill"
+          href="https://angular.dev/tutorials"
+          target="_blank"
+          rel="noopener"
+        >
+          Learn with Tutorials
+        </a>
+        <a
+          class="pill"
+          href="https://angular.love"
+          target="_blank"
+          rel="noopener"
+        >
+          Angular Love
+        </a>
+        <a
+          class="pill"
+          href="https://blog.angular.dev"
+          target="_blank"
+          rel="noopener"
+        >
+          Read the Blog
+        </a>
+      </div>
+      <div class="social-links">
+        <a
+          href="https://github.com/angular/angular"
+          aria-label="Github"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg
+            width="25"
+            height="24"
+            viewBox="0 0 25 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            alt="Github"
+          >
+            <path
+              d="M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.49326 22.3535 8.32132 23.9849C8.932 24.0944 9.16681 23.7269 9.16681 23.3931C9.16681 23.0949 9.15387 22.2601 9.15387 21.221C5.74724 21.9396 5.01254 19.8444 5.01254 19.8444C4.47463 18.4789 3.69714 18.121 3.69714 18.121C2.61933 17.3287 3.78053 17.3437 3.78053 17.3437C4.91722 17.4209 5.50535 18.5884 5.50535 18.5884C6.57043 20.3753 8.31661 19.8797 9.19356 19.5886C9.29849 18.7769 9.62243 18.2291 9.98815 17.9229C7.27154 17.6251 4.40507 16.5664 4.40507 11.7964C4.40507 10.4198 4.88503 9.29327 5.68765 8.41676C5.57018 8.10165 5.13823 6.825 5.81017 5.125C5.81017 5.125 6.78691 4.80028 9.15387 6.41146C10.0862 6.15417 11.0744 6.02541 12.0564 6.02115C13.0384 6.02541 14.0266 6.15417 14.9589 6.41146C17.3235 4.80028 18.3013 5.125 18.3013 5.125C18.9732 6.825 18.5412 8.10165 18.4227 8.41676C19.2264 9.29327 19.7018 10.4198 19.7018 11.7964C19.7018 16.5776 16.8271 17.6187 14.101 17.9128C14.5633 18.3055 14.9536 19.0488 14.9536 20.1907C14.9536 21.8029 14.9396 23.021 14.9396 23.3931C14.9396 23.7269 15.1717 24.1006 15.7909 23.9849C20.6113 22.3535 24.1006 17.7423 24.1006 12.3047C24.1006 5.50942 18.5942 0 12.3047 0Z"
+            />
+          </svg>
+        </a>
+        <a
+          href="https://twitter.com/angular"
+          aria-label="Twitter"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            alt="Twitter"
+          >
+            <path
+              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+            />
+          </svg>
+        </a>
+        <a
+          href="https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw"
+          aria-label="Youtube"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg
+            width="29"
+            height="20"
+            viewBox="0 0 29 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            alt="Youtube"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M27.4896 1.52422C27.9301 1.96749 28.2463 2.5277 28.4068 3.15837C29.0003 5.52994 29.0003 10 29.0003 10C29.0003 10 29.0003 14.4701 28.4068 16.8416C28.2463 17.4723 27.9301 18.0325 27.4896 18.4758C27.0464 18.9163 26.4862 19.2325 25.8555 19.3931C23.484 20 14.9847 20 14.9847 20C14.9847 20 6.48548 20 4.11396 19.3931C3.48329 19.2325 2.92307 18.9163 2.47984 18.4758C2.03938 18.0325 1.72313 17.4723 1.56264 16.8416C0.969167 14.4701 0.969167 10 0.969167 10C0.969167 10 0.969167 5.52994 1.56264 3.15837C1.72313 2.5277 2.03938 1.96749 2.47984 1.52422C2.92307 1.08376 3.48329 0.767538 4.11396 0.606985C6.48548 0 14.9847 0 14.9847 0C14.9847 0 23.484 0 25.8555 0.606985C26.4862 0.767538 27.0464 1.08376 27.4896 1.52422ZM12.0024 14.0021V6.00187L18.9968 10.002L12.0024 14.0021Z"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+
+<router-outlet />
