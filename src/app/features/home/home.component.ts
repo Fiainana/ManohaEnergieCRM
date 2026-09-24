@@ -9,7 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
       <div class="card">
         <h2>Bienvenue, {{ auth.displayName() || auth.user()?.login }}</h2>
         <p class="text-muted">
-          Vous êtes connecté au CRM Manoha Énergie via Sage100Api.
+          Vous êtes connecté au CRM Manoha Énergie.
         </p>
         <p>
           <strong>Rôles :</strong>
