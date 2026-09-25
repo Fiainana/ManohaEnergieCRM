@@ -2,7 +2,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { ClientsService } from '../../../core/services/clients.service';
-import { Client, FactureClient } from '../../../core/models/client.model';
+import {
+  Client,
+  ClientStats,
+  DevisClient,
+  FactureClient,
+} from '../../../core/models/client.model';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -21,6 +26,7 @@ export class ClientDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly client = signal<Client | null>(null);
+  readonly stats = signal<ClientStats | null>(null);
 
   readonly factures = signal<FactureClient[]>([]);
   readonly facturesLoading = signal(false);
@@ -29,6 +35,13 @@ export class ClientDetailComponent implements OnInit {
   readonly facturesTotal = signal(0);
   readonly facturesTotalPages = signal(0);
   readonly impayeesOnly = signal(false);
+
+  readonly devis = signal<DevisClient[]>([]);
+  readonly devisLoading = signal(false);
+  readonly devisError = signal<string | null>(null);
+  readonly devisPage = signal(1);
+  readonly devisTotal = signal(0);
+  readonly devisTotalPages = signal(0);
 
   private readonly pageSize = 15;
   private numero = '';
@@ -50,12 +63,29 @@ export class ClientDetailComponent implements OnInit {
     this.clientsApi.getByNumero(numero).subscribe({
       next: (data) => {
         this.client.set(data.client);
+        this.stats.set(data.stats ?? null);
         this.loading.set(false);
-        this.loadFactures(1);
+
+        // Précharger listes depuis la fiche si présentes, sinon API
+        if (data.dernieresFactures?.items?.length) {
+          this.factures.set(data.dernieresFactures.items);
+          this.facturesTotal.set(data.dernieresFactures.total ?? data.dernieresFactures.items.length);
+          this.facturesTotalPages.set(data.dernieresFactures.totalPages ?? 1);
+        } else {
+          this.loadFactures(1);
+        }
+
+        if (data.derniersDevis?.items?.length) {
+          this.devis.set(data.derniersDevis.items);
+          this.devisTotal.set(data.derniersDevis.total ?? data.derniersDevis.items.length);
+          this.devisTotalPages.set(data.derniersDevis.totalPages ?? 1);
+        } else {
+          this.loadDevis(1);
+        }
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.error?.message || err?.message || 'Client introuvable');
+        this.error.set(err?.message || 'Client introuvable');
       },
     });
   }
@@ -74,7 +104,26 @@ export class ClientDetailComponent implements OnInit {
       },
       error: (err) => {
         this.facturesLoading.set(false);
-        this.facturesError.set(err?.error?.message || err?.message || 'Erreur factures');
+        this.facturesError.set(err?.message || 'Erreur factures');
+      },
+    });
+  }
+
+  loadDevis(page = 1): void {
+    this.devisLoading.set(true);
+    this.devisError.set(null);
+    this.devisPage.set(page);
+
+    this.clientsApi.listDevis(this.numero, page, this.pageSize).subscribe({
+      next: (data) => {
+        this.devis.set(data.items ?? []);
+        this.devisTotal.set(data.total ?? 0);
+        this.devisTotalPages.set(data.totalPages ?? 0);
+        this.devisLoading.set(false);
+      },
+      error: (err) => {
+        this.devisLoading.set(false);
+        this.devisError.set(err?.message || 'Erreur devis');
       },
     });
   }
@@ -91,6 +140,16 @@ export class ClientDetailComponent implements OnInit {
   nextFactures(): void {
     if (this.facturesPage() < this.facturesTotalPages()) {
       this.loadFactures(this.facturesPage() + 1);
+    }
+  }
+
+  prevDevis(): void {
+    if (this.devisPage() > 1) this.loadDevis(this.devisPage() - 1);
+  }
+
+  nextDevis(): void {
+    if (this.devisPage() < this.devisTotalPages()) {
+      this.loadDevis(this.devisPage() + 1);
     }
   }
 

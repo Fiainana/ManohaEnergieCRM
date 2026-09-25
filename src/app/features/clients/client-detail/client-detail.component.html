@@ -21,14 +21,17 @@
         </div>
       </div>
       @if (canWrite()) {
-        <a [routerLink]="['/clients', c.numero, 'modifier']" class="btn btn--primary">Modifier</a>
+        <div class="page__actions">
+          <a [routerLink]="['/devis/nouveau']" [queryParams]="{ client: c.numero }" class="btn btn--ghost">Nouveau devis</a>
+          <a [routerLink]="['/clients', c.numero, 'modifier']" class="btn btn--primary">Modifier</a>
+        </div>
       }
     </header>
 
     <section class="encours-hero" [class.encours-hero--warn]="encours() > 0">
       <div>
         <p class="encours-hero__label">Encours Sage (CT_Encours)</p>
-        <p class="encours-hero__value">{{ encours() | number: '1.0-0' }}</p>
+        <p class="encours-hero__value">{{ encours() | number: '1.0-0' }} Ar</p>
       </div>
       <dl class="encours-hero__meta">
         <div>
@@ -52,6 +55,28 @@
       </dl>
     </section>
 
+    @if (stats(); as s) {
+      <section class="stats-row" aria-label="Statistiques client">
+        <div class="stat">
+          <span class="stat__label">Devis</span>
+          <strong>{{ s.nbDevis }}</strong>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Factures</span>
+          <strong>{{ s.nbFactures }}</strong>
+        </div>
+        <div class="stat">
+          <span class="stat__label">CA facturé</span>
+          <strong>{{ s.caTtcFacture | number: '1.0-0' }} Ar</strong>
+        </div>
+        <div class="stat" [class.stat--warn]="s.resteAPayer > 0">
+          <span class="stat__label">Reste à payer</span>
+          <strong>{{ s.resteAPayer | number: '1.0-0' }} Ar</strong>
+          <small>{{ s.nbImpayees }} impayée{{ s.nbImpayees > 1 ? 's' : '' }}</small>
+        </div>
+      </section>
+    }
+
     <div class="grid">
       <section class="card">
         <h2>Coordonnées</h2>
@@ -70,13 +95,84 @@
       <section class="card">
         <h2>Règlement</h2>
         <dl class="dl">
-          <div><dt>Mode règl.</dt><dd>{{ c.modeReglementNo != null ? c.modeReglementNo : '—' }}</dd></div>
-          <div><dt>Condition</dt><dd>{{ c.conditionReglementNo != null ? c.conditionReglementNo : '—' }}</dd></div>
+          <div>
+            <dt>Mode règl.</dt>
+            <dd>
+              {{ c.modeReglementLibelle || (c.modeReglementNo != null ? '#' + c.modeReglementNo : '—') }}
+            </dd>
+          </div>
+          <div>
+            <dt>Condition</dt>
+            <dd>
+              {{ c.conditionReglementLibelle || (c.conditionReglementNo != null ? '#' + c.conditionReglementNo : '—') }}
+            </dd>
+          </div>
           <div><dt>Qualité</dt><dd>{{ c.qualite || '—' }}</dd></div>
           <div><dt>Classement</dt><dd>{{ c.classement || '—' }}</dd></div>
         </dl>
       </section>
     </div>
+
+    <section class="card factures">
+      <div class="factures__head">
+        <h2>Devis</h2>
+      </div>
+      @if (devisError()) {
+        <div class="alert alert--error">{{ devisError() }}</div>
+      }
+      @if (devisLoading() && devis().length === 0) {
+        <p class="text-muted">Chargement des devis…</p>
+      } @else if (devis().length === 0) {
+        <p class="text-muted">Aucun devis.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pièce</th>
+                <th>Date</th>
+                <th>Réf.</th>
+                <th>TTC</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of devis(); track d.numeroPiece) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/devis', d.numeroPiece]" class="link-strong">{{ d.numeroPiece }}</a>
+                  </td>
+                  <td>{{ d.dateDocument ? (d.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td>{{ d.reference || '—' }}</td>
+                  <td class="num">{{ d.totalTTC != null ? (d.totalTTC | number: '1.0-0') : '—' }}</td>
+                  <td class="actions">
+                    <a [routerLink]="['/devis', d.numeroPiece]" class="btn btn--ghost btn--sm">Voir</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <footer class="pager">
+          <span class="text-muted">
+            {{ devisTotal() }} devis — page {{ devisPage() }} / {{ devisTotalPages() || 1 }}
+          </span>
+          <div class="pager__btns">
+            <button type="button" class="btn btn--ghost btn--sm" (click)="prevDevis()" [disabled]="devisPage() <= 1">
+              Précédent
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              (click)="nextDevis()"
+              [disabled]="devisPage() >= devisTotalPages()"
+            >
+              Suivant
+            </button>
+          </div>
+        </footer>
+      }
+    </section>
 
     <section class="card factures">
       <div class="factures__head">

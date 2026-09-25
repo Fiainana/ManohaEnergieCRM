@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FacturesService } from '../../core/services/factures.service';
+import { AuthService } from '../../core/services/auth.service';
 import { FactureEntete } from '../../core/models/facture.model';
 
 @Component({
@@ -16,6 +17,7 @@ import { FactureEntete } from '../../core/models/facture.model';
 })
 export class FacturesListComponent implements OnInit {
   private readonly api = inject(FacturesService);
+  private readonly auth = inject(AuthService);
   private readonly search$ = new Subject<string>();
 
   readonly loading = signal(false);
@@ -29,6 +31,9 @@ export class FacturesListComponent implements OnInit {
 
   search = '';
   aujourdhui = false;
+  impayeesOnly = false;
+  /** Commercial : mes FA par défaut ; Admin : tout (peut forcer mes) */
+  mesOnly = !this.auth.isAdmin();
 
   constructor() {
     this.search$
@@ -44,7 +49,7 @@ export class FacturesListComponent implements OnInit {
     this.search$.next(this.search.trim());
   }
 
-  onAujourdhui(): void {
+  onFilterChange(): void {
     this.load(1);
   }
 
@@ -55,6 +60,8 @@ export class FacturesListComponent implements OnInit {
       .list({
         search: this.search.trim() || undefined,
         aujourdhui: this.aujourdhui || undefined,
+        impayees: this.impayeesOnly || undefined,
+        mes: this.mesOnly,
         page,
         pageSize: this.pageSize,
       })
@@ -83,6 +90,10 @@ export class FacturesListComponent implements OnInit {
       next: (blob) => {
         this.api.openPrint(blob);
         this.printPiece.set(null);
+        // Marquer déjà imprimée en local
+        this.items.update((list) =>
+          list.map((f) => (f.numeroPiece === piece ? { ...f, dejaImprimee: true } : f))
+        );
       },
       error: (err) => {
         this.printPiece.set(null);

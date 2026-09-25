@@ -27,8 +27,16 @@
         />
       </div>
       <label class="filters__check">
-        <input type="checkbox" [(ngModel)]="aujourdhui" (ngModelChange)="onAujourdhui()" />
-        Aujourd'hui seulement
+        <input type="checkbox" [(ngModel)]="mesOnly" (ngModelChange)="onFilterChange()" />
+        Mes factures
+      </label>
+      <label class="filters__check">
+        <input type="checkbox" [(ngModel)]="impayeesOnly" (ngModelChange)="onFilterChange()" />
+        Impayées
+      </label>
+      <label class="filters__check">
+        <input type="checkbox" [(ngModel)]="aujourdhui" (ngModelChange)="onFilterChange()" />
+        Aujourd'hui
       </label>
     </div>
     <p class="filters__hint text-muted">
@@ -46,7 +54,7 @@
     } @else if (items().length === 0) {
       <div class="empty">
         <p class="empty__title">Aucune facture</p>
-        <p class="text-muted">Modifiez la recherche ou le filtre de date.</p>
+        <p class="text-muted">Modifiez la recherche ou les filtres.</p>
       </div>
     } @else {
       <table class="odo-table">
@@ -58,6 +66,7 @@
             <th>Référence</th>
             <th class="num">Total TTC</th>
             <th class="num">Reste</th>
+            <th>Statut</th>
             <th class="act">Imprimer</th>
           </tr>
         </thead>
@@ -73,6 +82,13 @@
               </td>
               <td class="num" [class.text-danger]="(f.resteAPayer ?? 0) > 0">
                 {{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') + ' Ar' : '—' }}
+              </td>
+              <td>
+                @if (f.dejaImprimee) {
+                  <span class="badge-imprimee">Imprimée</span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
               </td>
               <td class="act" (click)="$event.stopPropagation()">
                 <button
