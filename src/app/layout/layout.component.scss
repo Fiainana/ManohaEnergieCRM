@@ -1,21 +1,31 @@
 .shell {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
   min-height: 100dvh;
-  transition: grid-template-columns 0.22s ease;
+  padding-left: var(--sidebar-width);
+  transition: padding-left 0.22s ease;
 
   &--collapsed {
-    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+    padding-left: var(--sidebar-width-collapsed);
   }
 }
 
 .sidebar {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
   display: flex;
   flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100dvh;
+  overflow: hidden;
   background: #111111;
   color: #f5f5f5;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  transition: width 0.22s ease;
+
+  &.is-collapsed {
+    width: var(--sidebar-width-collapsed);
+  }
 
   &__brand {
     display: flex;
@@ -24,6 +34,7 @@
     min-height: var(--header-height);
     padding: 0.85rem 0.9rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
   }
 
   &__logo {
@@ -51,10 +62,12 @@
 
   &__nav {
     flex: 1;
+    min-height: 0;
     padding: 0.9rem 0.65rem;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    overflow-y: auto;
   }
 
   &__link,
@@ -103,6 +116,7 @@
   &__footer {
     padding: 0.75rem 0.65rem 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
   }
 
   &__user {
@@ -230,6 +244,9 @@
 }
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   height: var(--header-height);
   display: flex;
   align-items: center;
@@ -279,7 +296,7 @@
 @media (max-width: 768px) {
   .shell,
   .shell--collapsed {
-    grid-template-columns: 1fr;
+    padding-left: 0;
   }
 
   .sidebar {
