@@ -27,8 +27,15 @@ export class UsersPageComponent implements OnInit {
   nom = '';
   prenom = '';
   matricule = '';
+  fonction = '';
+  service = '';
   roleCommercial = true;
   roleAdmin = false;
+  vendeur = true;
+  acheteur = false;
+  caissier = false;
+  chargeRecouvrement = false;
+  receptionnaire = false;
   actif = true;
 
   ngOnInit(): void {
@@ -84,8 +91,7 @@ export class UsersPageComponent implements OnInit {
   }
 
   roleList(u: UserApp): string[] {
-    const raw = this.rolesOf(u);
-    return raw
+    return this.rolesOf(u)
       .split(',')
       .map((r) => r.trim())
       .filter(Boolean);
@@ -111,12 +117,18 @@ export class UsersPageComponent implements OnInit {
     this.formError.set(null);
     this.api
       .create({
-        login: this.login.trim(),
+        login: this.login,
         password: this.password,
-        nom: this.nom.trim(),
-        prenom: this.prenom.trim() || undefined,
-        matricule: this.matricule.trim() || undefined,
-        vendeur: this.roleCommercial,
+        nom: this.nom,
+        prenom: this.prenom,
+        matricule: this.matricule,
+        fonction: this.fonction,
+        service: this.service,
+        vendeur: this.vendeur || this.roleCommercial,
+        acheteur: this.acheteur,
+        caissier: this.caissier,
+        chargeRecouvrement: this.chargeRecouvrement,
+        receptionnaire: this.receptionnaire,
         isAdmin: this.roleAdmin,
         actif: this.actif,
         roles,
@@ -143,8 +155,15 @@ export class UsersPageComponent implements OnInit {
     this.nom = '';
     this.prenom = '';
     this.matricule = '';
+    this.fonction = '';
+    this.service = '';
     this.roleCommercial = true;
     this.roleAdmin = false;
+    this.vendeur = true;
+    this.acheteur = false;
+    this.caissier = false;
+    this.chargeRecouvrement = false;
+    this.receptionnaire = false;
     this.actif = true;
   }
 }

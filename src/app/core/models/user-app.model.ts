@@ -13,12 +13,18 @@ export interface UserApp {
 export interface CreateUserAppRequest {
   login: string;
   password?: string;
+  rfidCode?: string;
+  pin?: string;
   nom: string;
   prenom?: string;
   matricule?: string;
   fonction?: string;
   service?: string;
   vendeur?: boolean;
+  acheteur?: boolean;
+  caissier?: boolean;
+  chargeRecouvrement?: boolean;
+  receptionnaire?: boolean;
   isAdmin?: boolean;
   actif?: boolean;
   roles?: string[];

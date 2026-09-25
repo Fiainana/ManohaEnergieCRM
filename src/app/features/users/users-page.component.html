@@ -8,11 +8,7 @@
   </header>
 
   <div class="toolbar__filters">
-    <input
-      type="search"
-      [(ngModel)]="search"
-      placeholder="Rechercher un compte, un nom, un rôle…"
-    />
+    <input type="search" [(ngModel)]="search" placeholder="Rechercher un compte, un nom, un rôle…" />
     <span class="text-muted">{{ filtered().length }} compte{{ filtered().length > 1 ? 's' : '' }}</span>
   </div>
 
@@ -48,9 +44,7 @@
                 <span class="pill pill--muted">Sage {{ u.sageMatricule }}</span>
               }
             </div>
-            <span class="status" [class.is-off]="u.actif === false">
-              {{ u.actif === false ? 'Inactif' : 'Actif' }}
-            </span>
+            <span class="status" [class.is-off]="u.actif === false">{{ u.actif === false ? 'Inactif' : 'Actif' }}</span>
           </li>
         }
       </ul>
@@ -75,48 +69,52 @@
 
       <form class="modal__body" (ngSubmit)="submit()">
         <fieldset>
-          <legend>Identité</legend>
+          <legend>Identité Sage</legend>
           <div class="row">
             <label>Nom *<input [(ngModel)]="nom" name="nom" required /></label>
             <label>Prénom<input [(ngModel)]="prenom" name="prenom" /></label>
           </div>
+          <div class="row">
+            <label>Matricule Sage<input [(ngModel)]="matricule" name="matricule" maxlength="10" placeholder="laisser vide = création auto" /></label>
+            <label>Fonction<input [(ngModel)]="fonction" name="fonction" /></label>
+          </div>
+          <label>Service<input [(ngModel)]="service" name="service" /></label>
         </fieldset>
 
         <fieldset>
-          <legend>Accès</legend>
+          <legend>Accès application</legend>
           <div class="row">
             <label>Login *<input [(ngModel)]="login" name="login" required autocomplete="off" /></label>
             <label>Mot de passe *<input [(ngModel)]="password" name="password" type="password" required autocomplete="new-password" /></label>
           </div>
-          <label>Matricule Sage <span class="hint">optionnel</span>
-            <input [(ngModel)]="matricule" name="matricule" maxlength="10" />
-          </label>
         </fieldset>
 
         <fieldset>
-          <legend>Droits</legend>
+          <legend>Rôles applicatifs</legend>
           <div class="roles">
             <label class="choice" [class.on]="roleCommercial">
               <input type="checkbox" [(ngModel)]="roleCommercial" name="roleCommercial" />
-              <span>
-                <strong>Commercial</strong>
-                <small>Clients, articles, devis</small>
-              </span>
+              <span><strong>Commercial</strong><small>CRM B2B</small></span>
             </label>
             <label class="choice" [class.on]="roleAdmin">
               <input type="checkbox" [(ngModel)]="roleAdmin" name="roleAdmin" />
-              <span>
-                <strong>Administrateur</strong>
-                <small>Gestion des comptes et validations</small>
-              </span>
+              <span><strong>Admin</strong><small>Gestion des comptes</small></span>
             </label>
             <label class="choice" [class.on]="actif">
               <input type="checkbox" [(ngModel)]="actif" name="actif" />
-              <span>
-                <strong>Compte actif</strong>
-                <small>Peut se connecter immédiatement</small>
-              </span>
+              <span><strong>Actif</strong><small>Peut se connecter</small></span>
             </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Profil collaborateur Sage</legend>
+          <div class="roles roles--compact">
+            <label class="choice" [class.on]="vendeur"><input type="checkbox" [(ngModel)]="vendeur" name="vendeur" /><span><strong>Vendeur</strong></span></label>
+            <label class="choice" [class.on]="acheteur"><input type="checkbox" [(ngModel)]="acheteur" name="acheteur" /><span><strong>Acheteur</strong></span></label>
+            <label class="choice" [class.on]="caissier"><input type="checkbox" [(ngModel)]="caissier" name="caissier" /><span><strong>Caissier</strong></span></label>
+            <label class="choice" [class.on]="chargeRecouvrement"><input type="checkbox" [(ngModel)]="chargeRecouvrement" name="chargeRecouvrement" /><span><strong>Recouvrement</strong></span></label>
+            <label class="choice" [class.on]="receptionnaire"><input type="checkbox" [(ngModel)]="receptionnaire" name="receptionnaire" /><span><strong>Réceptionnaire</strong></span></label>
           </div>
         </fieldset>
 
