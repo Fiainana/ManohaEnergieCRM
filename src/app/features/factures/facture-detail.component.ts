@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DecimalPipe, DatePipe, JsonPipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { FacturesService } from '../../core/services/factures.service';
 import { FactureDetail } from '../../core/models/facture.model';
 
