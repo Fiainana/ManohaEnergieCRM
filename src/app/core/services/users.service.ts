@@ -45,7 +45,11 @@ export class UsersService {
     const body = http?.error as ApiResponse | undefined;
     if (body?.errors?.length) return body.errors.join(' · ');
     if (body?.message) return body.message;
+    if (body?.detail) return body.detail;
     if (http?.status === 403) return 'Accès réservé à l’administrateur.';
+    if (http?.status === 500) {
+      return body?.message || 'Erreur serveur sur /api/users. Relance l’API Sage100Api puis réessaie.';
+    }
     return http?.message || 'Erreur utilisateurs';
   }
 }
