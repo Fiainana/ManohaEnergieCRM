@@ -6,19 +6,20 @@
 }
 
 :root {
-  --color-primary: #DC2626;
-  --color-primary-hover: #B91C1C;
-  --color-primary-soft: rgba(220, 38, 38, 0.1);
-  --color-accent: #991B1B;
+  --color-primary: #e30917;
+  --color-primary-hover: #c20814;
+  --color-primary-soft: rgba(227, 9, 23, 0.1);
+  --color-accent: #9f0712;
   --color-surface: #ffffff;
   --color-bg: #fafafa;
   --color-border: #e5e5e5;
   --color-text: #171717;
   --color-text-muted: #737373;
-  --color-danger: #DC2626;
+  --color-danger: #e30917;
   --color-success: #16a34a;
   --color-warning: #d97706;
   --sidebar-width: 260px;
+  --sidebar-width-collapsed: 76px;
   --header-height: 56px;
   --radius: 10px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
