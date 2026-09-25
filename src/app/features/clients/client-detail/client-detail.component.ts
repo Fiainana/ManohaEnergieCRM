@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { ClientsService } from '../../../core/services/clients.service';
-import { FacturesService } from '../../../core/services/factures.service';
 import { Client, FactureClient } from '../../../core/models/client.model';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -17,7 +16,6 @@ export class ClientDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly clientsApi = inject(ClientsService);
-  private readonly facturesApi = inject(FacturesService);
   readonly auth = inject(AuthService);
 
   readonly loading = signal(true);
@@ -31,8 +29,6 @@ export class ClientDetailComponent implements OnInit {
   readonly facturesTotal = signal(0);
   readonly facturesTotalPages = signal(0);
   readonly impayeesOnly = signal(false);
-  readonly pdfBusy = signal<string | null>(null);
-  readonly pdfError = signal<string | null>(null);
 
   private readonly pageSize = 15;
   private numero = '';
@@ -96,21 +92,6 @@ export class ClientDetailComponent implements OnInit {
     if (this.facturesPage() < this.facturesTotalPages()) {
       this.loadFactures(this.facturesPage() + 1);
     }
-  }
-
-  downloadPdf(piece: string): void {
-    this.pdfBusy.set(piece);
-    this.pdfError.set(null);
-    this.facturesApi.downloadPdf(piece).subscribe({
-      next: ({ blob, fileName }) => {
-        this.facturesApi.openPdf(blob, fileName);
-        this.pdfBusy.set(null);
-      },
-      error: (err) => {
-        this.pdfBusy.set(null);
-        this.pdfError.set(err?.message || 'PDF indisponible');
-      },
-    });
   }
 
   encours(): number {

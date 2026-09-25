@@ -24,14 +24,7 @@
           }
         </p>
       </div>
-      <button type="button" class="btn btn--primary" (click)="downloadPdf()" [disabled]="pdfBusy()">
-        {{ pdfBusy() ? 'PDF…' : 'Télécharger le PDF' }}
-      </button>
     </header>
-
-    @if (pdfError()) {
-      <div class="alert alert--error">{{ pdfError() }}</div>
-    }
 
     <section class="totals">
       <div>

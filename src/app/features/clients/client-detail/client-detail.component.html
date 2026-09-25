@@ -82,28 +82,15 @@
       <div class="factures__head">
         <h2>Factures</h2>
         <div class="factures__tabs">
-          <button
-            type="button"
-            class="chip"
-            [class.is-on]="!impayeesOnly()"
-            (click)="toggleImpayees(false)"
-          >
+          <button type="button" class="chip" [class.is-on]="!impayeesOnly()" (click)="toggleImpayees(false)">
             Toutes
           </button>
-          <button
-            type="button"
-            class="chip"
-            [class.is-on]="impayeesOnly()"
-            (click)="toggleImpayees(true)"
-          >
+          <button type="button" class="chip" [class.is-on]="impayeesOnly()" (click)="toggleImpayees(true)">
             Impayées
           </button>
         </div>
       </div>
 
-      @if (pdfError()) {
-        <div class="alert alert--error">{{ pdfError() }}</div>
-      }
       @if (facturesError()) {
         <div class="alert alert--error">{{ facturesError() }}</div>
       }
@@ -145,14 +132,6 @@
                   </td>
                   <td class="actions">
                     <a [routerLink]="['/factures', f.numeroPiece]" [queryParams]="{ client: c.numero }" class="btn btn--ghost btn--sm">Voir</a>
-                    <button
-                      type="button"
-                      class="btn btn--ghost btn--sm"
-                      (click)="downloadPdf(f.numeroPiece)"
-                      [disabled]="pdfBusy() === f.numeroPiece"
-                    >
-                      {{ pdfBusy() === f.numeroPiece ? 'PDF…' : 'PDF' }}
-                    </button>
                   </td>
                 </tr>
               }

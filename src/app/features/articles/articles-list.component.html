@@ -1,0 +1,87 @@
+<div class="page">
+  <header class="page__header">
+    <div>
+      <p class="eyebrow">Catalogue Sage</p>
+      <h1>Articles</h1>
+      <p class="text-muted">
+        @if (loading() && items().length === 0) {
+          Chargement…
+        } @else {
+          {{ total() }} article{{ total() > 1 ? 's' : '' }}
+        }
+      </p>
+    </div>
+  </header>
+
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field">
+        <label for="search">Recherche</label>
+        <input
+          id="search"
+          type="search"
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Référence ou désignation…"
+          autocomplete="off"
+        />
+      </div>
+      <label class="filters__check">
+        <input type="checkbox" [(ngModel)]="inclureSommeil" (change)="onSommeilChange()" />
+        Inclure sommeil
+      </label>
+      <button type="button" class="btn btn--ghost" (click)="clearFilters()">Réinitialiser</button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  <div class="list-card">
+    @if (loading() && items().length === 0) {
+      <p class="empty text-muted">Chargement des articles…</p>
+    } @else if (items().length === 0) {
+      <p class="empty text-muted">Aucun article trouvé.</p>
+    } @else {
+      <ul class="art-list">
+        @for (a of items(); track a.reference) {
+          <li [class.is-sommeil]="a.sommeil">
+            <a [routerLink]="['/articles', a.reference]" class="art-row">
+              <span class="art-row__main">
+                <span class="art-row__ref">{{ a.reference }}</span>
+                <span class="art-row__name">{{ a.designation || '—' }}</span>
+                <span class="art-row__meta">
+                  {{ a.codeFamille || 'Sans famille' }}
+                  @if (a.uniteVenteLibelle) {
+                    · {{ a.uniteVenteLibelle }}
+                  }
+                </span>
+              </span>
+              <span class="art-row__side">
+                <span class="price">
+                  {{ a.prixVente != null ? (a.prixVente | number: '1.0-0') : '—' }}
+                  <small>PV</small>
+                </span>
+                <span class="stock" [class.is-low]="(a.stockDisponible ?? 0) <= 0">
+                  {{ a.stockDisponible != null ? (a.stockDisponible | number: '1.0-2') : '—' }}
+                  <small>dispo</small>
+                </span>
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+      <div class="list-footer text-muted">
+        @if (loadingMore()) {
+          Chargement…
+        } @else if (!hasMore()) {
+          Fin de la liste — {{ items().length }} / {{ total() }}
+        } @else {
+          {{ items().length }} / {{ total() }} articles affichés
+        }
+      </div>
+    }
+  </div>
+  <div #sentinel class="sentinel"></div>
+</div>

@@ -1,0 +1,87 @@
+<div class="page">
+  <a routerLink="/articles" class="back-link">← Retour aux articles</a>
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  } @else if (article(); as a) {
+    <header class="page__header">
+      <div>
+        <p class="page__code">{{ a.reference }}</p>
+        <h1>{{ a.designation || a.reference }}</h1>
+        @if (a.sommeil) {
+          <span class="badge badge--muted">Sommeil</span>
+        }
+      </div>
+    </header>
+
+    <section class="totals">
+      <div>
+        <span>Prix de vente</span>
+        <strong>{{ a.prixVente != null ? (a.prixVente | number: '1.0-0') : '—' }}</strong>
+      </div>
+      <div>
+        <span>Prix d’achat</span>
+        <strong>{{ a.prixAchat != null ? (a.prixAchat | number: '1.0-0') : '—' }}</strong>
+      </div>
+      <div>
+        <span>Stock total</span>
+        <strong>{{ stockTotal() | number: '1.0-2' }}</strong>
+      </div>
+      <div [class.is-low]="stockDisponible() <= 0">
+        <span>Disponible</span>
+        <strong>{{ stockDisponible() | number: '1.0-2' }}</strong>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Fiche</h2>
+        <dl class="dl">
+          <div><dt>Famille</dt><dd>{{ a.codeFamille || '—' }}</dd></div>
+          <div><dt>Unité</dt><dd>{{ a.uniteVenteLibelle || a.uniteVenteNo || '—' }}</dd></div>
+          <div><dt>Réservé</dt><dd>{{ stockReserve() | number: '1.0-2' }}</dd></div>
+          <div><dt>Commandé</dt><dd>{{ stockCommande() | number: '1.0-2' }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>Stock par dépôt</h2>
+        @if (stocks().length === 0) {
+          <p class="text-muted">Aucun stock dépôt.</p>
+        } @else {
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Dépôt</th>
+                <th>Stock</th>
+                <th>Rés.</th>
+                <th>Cde</th>
+                <th>Dispo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of stocks(); track s.depotNo) {
+                <tr>
+                  <td>
+                    {{ s.depotIntitule || s.depotNo }}
+                    @if (s.principal) {
+                      <small class="text-muted"> principal</small>
+                    }
+                  </td>
+                  <td class="num">{{ s.stock | number: '1.0-2' }}</td>
+                  <td class="num">{{ s.reserve | number: '1.0-2' }}</td>
+                  <td class="num">{{ s.commande | number: '1.0-2' }}</td>
+                  <td class="num" [class.text-danger]="(s.disponible ?? 0) <= 0">
+                    {{ s.disponible | number: '1.0-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+    </div>
+  }
+</div>

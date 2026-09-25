@@ -18,8 +18,6 @@ export class FactureDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly facture = signal<FactureDetail | null>(null);
-  readonly pdfBusy = signal(false);
-  readonly pdfError = signal<string | null>(null);
   readonly clientNumero = signal<string | null>(null);
 
   ngOnInit(): void {
@@ -47,23 +45,6 @@ export class FactureDetailComponent implements OnInit {
       error: (err) => {
         this.loading.set(false);
         this.error.set(err?.error?.message || err?.message || 'Facture introuvable');
-      },
-    });
-  }
-
-  downloadPdf(): void {
-    const piece = this.facture()?.numeroPiece;
-    if (!piece) return;
-    this.pdfBusy.set(true);
-    this.pdfError.set(null);
-    this.facturesApi.downloadPdf(piece).subscribe({
-      next: ({ blob, fileName }) => {
-        this.facturesApi.openPdf(blob, fileName);
-        this.pdfBusy.set(false);
-      },
-      error: (err) => {
-        this.pdfBusy.set(false);
-        this.pdfError.set(err?.message || 'PDF indisponible');
       },
     });
   }
