@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, roleGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { HomeComponent } from './features/home/home.component';
@@ -11,6 +11,7 @@ import { ArticlesListComponent } from './features/articles/articles-list.compone
 import { ArticleDetailComponent } from './features/articles/article-detail.component';
 import { DevisListComponent } from './features/devis/devis-list.component';
 import { DevisFormComponent } from './features/devis/devis-form.component';
+import { UsersPageComponent } from './features/users/users-page.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -30,6 +31,7 @@ export const routes: Routes = [
       { path: 'devis', component: DevisListComponent },
       { path: 'devis/nouveau', component: DevisFormComponent },
       { path: 'devis/:numeroPiece', component: DevisFormComponent },
+      { path: 'utilisateurs', component: UsersPageComponent, canActivate: [roleGuard('Admin')] },
       { path: '**', redirectTo: '' },
     ],
   },

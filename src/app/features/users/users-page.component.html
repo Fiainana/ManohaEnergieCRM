@@ -1,0 +1,86 @@
+<div class="page">
+  <header class="page__header">
+    <div>
+      <p class="eyebrow">Administration</p>
+      <h1>Utilisateurs</h1>
+      <p class="text-muted">Création réservée à l’administrateur. Lie aussi un collaborateur Sage.</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+  @if (success()) {
+    <div class="alert alert--ok">{{ success() }}</div>
+  }
+
+  <div class="grid">
+    <section class="card">
+      <h2>Nouvel utilisateur</h2>
+      <form class="form" (ngSubmit)="submit()">
+        <label>
+          Login
+          <input [(ngModel)]="login" name="login" required autocomplete="off" />
+        </label>
+        <label>
+          Mot de passe
+          <input [(ngModel)]="password" name="password" type="password" required autocomplete="new-password" />
+        </label>
+        <div class="row">
+          <label>
+            Nom
+            <input [(ngModel)]="nom" name="nom" required />
+          </label>
+          <label>
+            Prénom
+            <input [(ngModel)]="prenom" name="prenom" />
+          </label>
+        </div>
+        <label>
+          Matricule Sage (optionnel)
+          <input [(ngModel)]="matricule" name="matricule" maxlength="10" />
+        </label>
+        <div class="checks">
+          <label><input type="checkbox" [(ngModel)]="roleCommercial" name="roleCommercial" /> Commercial</label>
+          <label><input type="checkbox" [(ngModel)]="roleAdmin" name="roleAdmin" /> Admin</label>
+          <label><input type="checkbox" [(ngModel)]="actif" name="actif" /> Actif</label>
+        </div>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Création…' : 'Créer l’utilisateur' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Comptes existants</h2>
+      @if (loading()) {
+        <p class="text-muted">Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="text-muted">Aucun utilisateur.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Login</th>
+              <th>Nom</th>
+              <th>Rôles</th>
+              <th>Sage</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of items(); track u.id || u.login) {
+              <tr>
+                <td>{{ u.login }}</td>
+                <td>{{ u.prenom }} {{ u.nom }}</td>
+                <td>{{ rolesOf(u) || '—' }}</td>
+                <td>{{ u.sageMatricule || '—' }}</td>
+                <td>{{ u.actif === false ? 'Inactif' : 'Actif' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  </div>
+</div>
