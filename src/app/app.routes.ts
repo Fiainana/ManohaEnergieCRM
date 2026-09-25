@@ -12,6 +12,9 @@ import { ArticleDetailComponent } from './features/articles/article-detail.compo
 import { DevisListComponent } from './features/devis/devis-list.component';
 import { DevisFormComponent } from './features/devis/devis-form.component';
 import { UsersPageComponent } from './features/users/users-page.component';
+import { DemandesAchatListComponent } from './features/demandes-achat/demandes-achat-list.component';
+import { DemandeAchatFormComponent } from './features/demandes-achat/demande-achat-form.component';
+import { DemandeAchatDetailComponent } from './features/demandes-achat/demande-achat-detail.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,6 +34,21 @@ export const routes: Routes = [
       { path: 'devis', component: DevisListComponent },
       { path: 'devis/nouveau', component: DevisFormComponent },
       { path: 'devis/:numeroPiece', component: DevisFormComponent },
+      {
+        path: 'demandes-achat',
+        component: DemandesAchatListComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
+      {
+        path: 'demandes-achat/nouveau',
+        component: DemandeAchatFormComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
+      {
+        path: 'demandes-achat/:id',
+        component: DemandeAchatDetailComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
       { path: 'utilisateurs', component: UsersPageComponent, canActivate: [roleGuard('Admin')] },
       { path: '**', redirectTo: '' },
     ],

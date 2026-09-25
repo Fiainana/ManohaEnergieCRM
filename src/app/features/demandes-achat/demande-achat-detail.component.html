@@ -1,0 +1,165 @@
+<div class="odo-form">
+  <a routerLink="/demandes-achat" class="back">← Demandes d'achat</a>
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else if (error() && !detail()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  } @else if (detail(); as d) {
+    <header class="statusbar">
+      <div>
+        <p class="eyebrow">Demande d'achat</p>
+        <h1>#{{ d.entete.id }}</h1>
+      </div>
+      <span class="badge" [class]="statutClass(d.entete.statut)">
+        {{ d.entete.statutLibelle || d.entete.statut }}
+      </span>
+    </header>
+
+    @if (error()) {
+      <div class="alert alert--error">{{ error() }}</div>
+    }
+    @if (success()) {
+      <div class="alert alert--ok">{{ success() }}</div>
+    }
+
+    <div class="actions">
+      @if (canAnnuler()) {
+        <button type="button" class="btn btn--ghost" (click)="annuler()" [disabled]="busy()">Annuler</button>
+      }
+    </div>
+
+    <section class="sheet meta">
+      <div class="meta__grid">
+        <div>
+          <span class="lbl">Date</span>
+          <strong>{{ d.entete.dateCreation ? (d.entete.dateCreation | date: 'dd/MM/yyyy HH:mm') : '—' }}</strong>
+        </div>
+        <div>
+          <span class="lbl">Demandeur</span>
+          <strong>{{ d.entete.demandeur?.libelle || d.entete.demandeur?.login || '—' }}</strong>
+        </div>
+        <div>
+          <span class="lbl">Fournisseur</span>
+          <strong>{{ d.entete.fournisseurCode || '—' }}</strong>
+        </div>
+        <div>
+          <span class="lbl">Pièce Sage</span>
+          <strong class="mono">{{ d.entete.pieceSage || '—' }}</strong>
+        </div>
+        <div>
+          <span class="lbl">Dépôt</span>
+          <strong>
+            @if (d.entete.depotNo) {
+              {{ d.entete.depotNo }}
+              @if (d.entete.depotIntitule) {
+                — {{ d.entete.depotIntitule }}
+              }
+            } @else {
+              —
+            }
+          </strong>
+        </div>
+        <div class="meta--full">
+          <span class="lbl">Note</span>
+          <strong>{{ d.entete.note || '—' }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <h2 class="sheet__title">Lignes</h2>
+      <table class="lines">
+        <thead>
+          <tr>
+            <th>Réf. fournisseur</th>
+            <th class="num">Qté</th>
+            <th>Article Sage</th>
+            <th class="num">Qté reçue</th>
+            @if (auth.isAdmin()) {
+              <th></th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of d.lignes; track l.id) {
+            <tr>
+              <td class="strong">{{ l.refFournisseur }}</td>
+              <td class="num">{{ l.quantite | number: '1.0-2' }}</td>
+              <td class="mono">{{ l.articleSage || '—' }}</td>
+              <td class="num">{{ l.qteRecue != null ? (l.qteRecue | number: '1.0-2') : '—' }}</td>
+              @if (auth.isAdmin()) {
+                <td>
+                  @if (!l.articleSage && d.entete.statut === 'EnAttenteArticle') {
+                    <button type="button" class="linkish" (click)="openArticleForm(l)">Créer article</button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    @if (articleLigneId != null) {
+      <section class="sheet panel">
+        <div class="panel__head">
+          <h2 class="sheet__title">Créer / rattacher article Sage</h2>
+          <button type="button" class="linkish" (click)="closeArticleForm()">✕</button>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span>Réf. article Sage *</span>
+            <input [(ngModel)]="articleForm.articleReference" maxlength="19" />
+          </label>
+          <label>
+            <span>Désignation</span>
+            <input [(ngModel)]="articleForm.designation" maxlength="69" />
+          </label>
+          <label>
+            <span>Prix d'achat *</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="articleForm.prixAchat" />
+          </label>
+          <label>
+            <span>Prix de vente</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="articleForm.prixVente" />
+          </label>
+          <label>
+            <span>Famille</span>
+            <input [(ngModel)]="articleForm.codeFamille" maxlength="11" />
+          </label>
+          <label class="check">
+            <input type="checkbox" [(ngModel)]="articleForm.suiviStock" />
+            Suivi stock
+          </label>
+          <label class="check">
+            <input type="checkbox" [(ngModel)]="articleForm.rattacherSiExiste" />
+            Rattacher si existe déjà
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn--primary" (click)="submitArticle()" [disabled]="busy()">
+            {{ busy() ? 'Enregistrement…' : 'Enregistrer article' }}
+          </button>
+          <button type="button" class="btn btn--ghost" (click)="closeArticleForm()">Annuler</button>
+        </div>
+      </section>
+    }
+
+    @if (canGenererSage()) {
+      <section class="sheet panel">
+        <h2 class="sheet__title">Générer BC fournisseur Sage</h2>
+        <p class="text-muted">Tous les articles sont prêts. Indiquez le dépôt de réception (DE_No).</p>
+        <div class="form-row">
+          <label>
+            <span>N° dépôt *</span>
+            <input type="number" min="1" step="1" [(ngModel)]="depotNo" placeholder="ex. 1" />
+          </label>
+          <button type="button" class="btn btn--primary" (click)="genererSage()" [disabled]="busy()">
+            {{ busy() ? 'Génération…' : 'Créer BC Sage' }}
+          </button>
+        </div>
+      </section>
+    }
+  }
+</div>
