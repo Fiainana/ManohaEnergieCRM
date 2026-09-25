@@ -1,5 +1,5 @@
 .page {
-  max-width: 960px;
+  width: 100%;
 }
 
 .back-link {
@@ -19,7 +19,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 
   h1 {
     margin: 0.15rem 0 0.5rem;
@@ -39,6 +39,59 @@
 .page__badges {
   display: flex;
   gap: 0.4rem;
+}
+
+.encours-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--shadow);
+
+  &--warn {
+    border-color: #fecaca;
+    background: #fff7f7;
+  }
+
+  &__label {
+    margin: 0 0 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__meta {
+    margin: 0;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+
+    dt {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      font-weight: 550;
+    }
+
+    dd {
+      margin: 0.15rem 0 0;
+      font-weight: 600;
+    }
+  }
 }
 
 .grid {
@@ -83,28 +136,96 @@
 }
 
 .factures {
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
 
-    th,
-    td {
-      padding: 0.6rem 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
+    h2 {
+      margin: 0;
     }
+  }
 
-    th {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      background: #fafafa;
-    }
+  &__tabs {
+    display: flex;
+    gap: 0.4rem;
+  }
+}
 
-    .num {
-      font-variant-numeric: tabular-nums;
-    }
+.chip {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 550;
+
+  &.is-on {
+    background: #e30917;
+    border-color: #e30917;
+    color: #fff;
+  }
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: #fafafa;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.link-strong {
+  font-weight: 650;
+  color: var(--color-text);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.btn--sm {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.85rem;
+  font-size: 0.85rem;
+
+  &__btns {
+    display: flex;
+    gap: 0.35rem;
   }
 }
 
@@ -132,6 +253,7 @@
 }
 
 .alert--error {
+  margin-bottom: 0.75rem;
   padding: 0.75rem 1rem;
   background: #fef2f2;
   border: 1px solid #fecaca;

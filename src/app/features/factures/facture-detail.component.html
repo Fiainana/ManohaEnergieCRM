@@ -1,0 +1,89 @@
+<div class="page">
+  @if (clientNumero()) {
+    <a [routerLink]="['/clients', clientNumero()]" class="back-link">← Retour au client</a>
+  } @else {
+    <a routerLink="/clients" class="back-link">← Retour aux clients</a>
+  }
+
+  @if (loading()) {
+    <p class="text-muted">Chargement de la facture…</p>
+  } @else if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  } @else if (facture(); as f) {
+    <header class="page__header">
+      <div>
+        <p class="page__code">Facture</p>
+        <h1>{{ f.numeroPiece }}</h1>
+        <p class="text-muted">
+          {{ f.dateDocument ? (f.dateDocument | date: 'dd/MM/yyyy') : '' }}
+          @if (f.reference) {
+            · {{ f.reference }}
+          }
+          @if (f.clientIntitule) {
+            · {{ f.clientIntitule }}
+          }
+        </p>
+      </div>
+      <button type="button" class="btn btn--primary" (click)="downloadPdf()" [disabled]="pdfBusy()">
+        {{ pdfBusy() ? 'PDF…' : 'Télécharger le PDF' }}
+      </button>
+    </header>
+
+    @if (pdfError()) {
+      <div class="alert alert--error">{{ pdfError() }}</div>
+    }
+
+    <section class="totals">
+      <div>
+        <span>Total HT</span>
+        <strong>{{ f.totalHT != null ? (f.totalHT | number: '1.0-0') : '—' }}</strong>
+      </div>
+      <div>
+        <span>Total TTC</span>
+        <strong>{{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') : '—' }}</strong>
+      </div>
+      <div>
+        <span>Réglé</span>
+        <strong>{{ f.montantRegle != null ? (f.montantRegle | number: '1.0-0') : '—' }}</strong>
+      </div>
+      <div [class.is-due]="(f.resteAPayer ?? 0) > 0">
+        <span>Reste à payer</span>
+        <strong>{{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') : '—' }}</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Lignes</h2>
+      @if (!f.lignes?.length) {
+        <p class="text-muted">Aucune ligne détaillée renvoyée par l’API.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Réf.</th>
+                <th>Désignation</th>
+                <th>Qté</th>
+                <th>PU</th>
+                <th>Remise</th>
+                <th>HT</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of f.lignes; track $index) {
+                <tr>
+                  <td>{{ l.reference || '—' }}</td>
+                  <td>{{ l.designation || '—' }}</td>
+                  <td class="num">{{ l.quantite != null ? (l.quantite | number: '1.0-2') : '—' }}</td>
+                  <td class="num">{{ l.prixUnitaire != null ? (l.prixUnitaire | number: '1.0-0') : '—' }}</td>
+                  <td class="num">{{ l.remise != null ? (l.remise | number: '1.0-2') : '—' }}</td>
+                  <td class="num">{{ l.montantHT != null ? (l.montantHT | number: '1.0-0') : '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

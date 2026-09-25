@@ -6,6 +6,7 @@ import { HomeComponent } from './features/home/home.component';
 import { ClientsListComponent } from './features/clients/clients-list/clients-list.component';
 import { ClientDetailComponent } from './features/clients/client-detail/client-detail.component';
 import { ClientFormComponent } from './features/clients/client-form/client-form.component';
+import { FactureDetailComponent } from './features/factures/facture-detail.component';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,10 @@ export const routes: Routes = [
       {
         path: 'clients/:numero/modifier',
         component: ClientFormComponent,
+      },
+      {
+        path: 'factures/:numeroPiece',
+        component: FactureDetailComponent,
       },
       {
         path: '**',

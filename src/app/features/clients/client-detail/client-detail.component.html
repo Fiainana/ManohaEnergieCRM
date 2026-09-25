@@ -13,7 +13,7 @@
         <div class="page__badges">
           @if (c.sommeil) {
             <span class="badge badge--muted">Sommeil</span>
-          } @else if ((c.encours ?? 0) > 0) {
+          } @else if (encours() > 0) {
             <span class="badge badge--warn">À crédit</span>
           } @else {
             <span class="badge badge--ok">Actif</span>
@@ -24,6 +24,33 @@
         <a [routerLink]="['/clients', c.numero, 'modifier']" class="btn btn--primary">Modifier</a>
       }
     </header>
+
+    <section class="encours-hero" [class.encours-hero--warn]="encours() > 0">
+      <div>
+        <p class="encours-hero__label">Encours Sage (CT_Encours)</p>
+        <p class="encours-hero__value">{{ encours() | number: '1.0-0' }}</p>
+      </div>
+      <dl class="encours-hero__meta">
+        <div>
+          <dt>À crédit</dt>
+          <dd>{{ c.aCredit || encours() > 0 ? 'Oui' : 'Non' }}</dd>
+        </div>
+        <div>
+          <dt>Facturation libre</dt>
+          <dd>
+            {{
+              c.credit?.peutFacturerSansAdmin !== false && encours() <= 0 && !c.sommeil
+                ? 'Oui'
+                : 'Validation admin probable'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Représentant</dt>
+          <dd>{{ c.representant || '—' }}</dd>
+        </div>
+      </dl>
+    </section>
 
     <div class="grid">
       <section class="card">
@@ -37,39 +64,56 @@
           <div><dt>Téléphone</dt><dd>{{ c.telephone || '—' }}</dd></div>
           <div><dt>Email</dt><dd>{{ c.email || '—' }}</dd></div>
           <div><dt>SIRET / ID</dt><dd>{{ c.siret || c.identifiant || '—' }}</dd></div>
-          <div><dt>Représentant</dt><dd>{{ c.representant || '—' }}</dd></div>
         </dl>
       </section>
 
       <section class="card">
-        <h2>Crédit</h2>
+        <h2>Règlement</h2>
         <dl class="dl">
-          <div>
-            <dt>Encours</dt>
-            <dd [class.text-danger]="(c.encours ?? 0) > 0">
-              {{ c.encours != null ? (c.encours | number: '1.0-0') : '—' }}
-            </dd>
-          </div>
-          <div>
-            <dt>À crédit</dt>
-            <dd>{{ c.aCredit || (c.encours ?? 0) > 0 ? 'Oui' : 'Non' }}</dd>
-          </div>
-          <div>
-            <dt>Facturation libre</dt>
-            <dd>
-              {{ c.credit?.peutFacturerSansAdmin !== false && !(c.encours && c.encours > 0) && !c.sommeil
-                ? 'Oui'
-                : 'Validation admin possible' }}
-            </dd>
-          </div>
+          <div><dt>Mode règl.</dt><dd>{{ c.modeReglementNo != null ? c.modeReglementNo : '—' }}</dd></div>
+          <div><dt>Condition</dt><dd>{{ c.conditionReglementNo != null ? c.conditionReglementNo : '—' }}</dd></div>
+          <div><dt>Qualité</dt><dd>{{ c.qualite || '—' }}</dd></div>
+          <div><dt>Classement</dt><dd>{{ c.classement || '—' }}</dd></div>
         </dl>
       </section>
     </div>
 
     <section class="card factures">
-      <h2>Dernières factures</h2>
-      @if (factures().length === 0) {
-        <p class="text-muted">Aucune facture récente.</p>
+      <div class="factures__head">
+        <h2>Factures</h2>
+        <div class="factures__tabs">
+          <button
+            type="button"
+            class="chip"
+            [class.is-on]="!impayeesOnly()"
+            (click)="toggleImpayees(false)"
+          >
+            Toutes
+          </button>
+          <button
+            type="button"
+            class="chip"
+            [class.is-on]="impayeesOnly()"
+            (click)="toggleImpayees(true)"
+          >
+            Impayées
+          </button>
+        </div>
+      </div>
+
+      @if (pdfError()) {
+        <div class="alert alert--error">{{ pdfError() }}</div>
+      }
+      @if (facturesError()) {
+        <div class="alert alert--error">{{ facturesError() }}</div>
+      }
+
+      @if (facturesLoading() && factures().length === 0) {
+        <p class="text-muted">Chargement des factures…</p>
+      } @else if (factures().length === 0) {
+        <p class="text-muted">
+          {{ impayeesOnly() ? 'Aucune facture impayée.' : 'Aucune facture.' }}
+        </p>
       } @else {
         <div class="table-wrap">
           <table class="data-table">
@@ -79,24 +123,62 @@
                 <th>Date</th>
                 <th>Réf.</th>
                 <th>TTC</th>
+                <th>Règlé</th>
                 <th>Reste</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               @for (f of factures(); track f.numeroPiece) {
                 <tr>
-                  <td>{{ f.numeroPiece }}</td>
+                  <td>
+                    <a [routerLink]="['/factures', f.numeroPiece]" [queryParams]="{ client: c.numero }" class="link-strong">
+                      {{ f.numeroPiece }}
+                    </a>
+                  </td>
                   <td>{{ f.dateDocument ? (f.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
                   <td>{{ f.reference || '—' }}</td>
                   <td class="num">{{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') : '—' }}</td>
+                  <td class="num">{{ f.montantRegle != null ? (f.montantRegle | number: '1.0-0') : '—' }}</td>
                   <td class="num" [class.text-danger]="(f.resteAPayer ?? 0) > 0">
                     {{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') : '—' }}
+                  </td>
+                  <td class="actions">
+                    <a [routerLink]="['/factures', f.numeroPiece]" [queryParams]="{ client: c.numero }" class="btn btn--ghost btn--sm">Voir</a>
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--sm"
+                      (click)="downloadPdf(f.numeroPiece)"
+                      [disabled]="pdfBusy() === f.numeroPiece"
+                    >
+                      {{ pdfBusy() === f.numeroPiece ? 'PDF…' : 'PDF' }}
+                    </button>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
+
+        <footer class="pager">
+          <span class="text-muted">
+            {{ facturesTotal() }} facture{{ facturesTotal() > 1 ? 's' : '' }}
+            — page {{ facturesPage() }} / {{ facturesTotalPages() || 1 }}
+          </span>
+          <div class="pager__btns">
+            <button type="button" class="btn btn--ghost btn--sm" (click)="prevFactures()" [disabled]="facturesPage() <= 1">
+              Précédent
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              (click)="nextFactures()"
+              [disabled]="facturesPage() >= facturesTotalPages()"
+            >
+              Suivant
+            </button>
+          </div>
+        </footer>
       }
     </section>
   }
