@@ -51,21 +51,24 @@
               <span class="art-row__main">
                 <span class="art-row__ref">{{ a.reference }}</span>
                 <span class="art-row__name">{{ a.designation || '—' }}</span>
-                <span class="art-row__meta">
-                  {{ a.codeFamille || 'Sans famille' }}
-                  @if (a.uniteVenteLibelle) {
-                    · {{ a.uniteVenteLibelle }}
-                  }
-                </span>
+                <span class="art-row__meta">{{ a.codeFamille || 'Sans famille' }}</span>
+              </span>
+              <span class="unite">
+                {{ a.uniteVenteLibelle || '—' }}
+                <small>unité de vente</small>
               </span>
               <span class="art-row__side">
                 <span class="price">
-                  {{ a.prixVente != null ? (a.prixVente | number: '1.0-0') : '—' }}
-                  <small>PV</small>
+                  @if (a.prixVente != null) {
+                    {{ a.prixVente | number: '1.0-0' }} Ar
+                  } @else {
+                    —
+                  }
+                  <small>prix vente</small>
                 </span>
                 <span class="stock" [class.is-low]="(a.stockDisponible ?? 0) <= 0">
                   {{ a.stockDisponible != null ? (a.stockDisponible | number: '1.0-2') : '—' }}
-                  <small>dispo</small>
+                  <small>dispo {{ a.uniteVenteLibelle || '' }}</small>
                 </span>
               </span>
             </a>

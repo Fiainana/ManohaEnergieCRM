@@ -19,19 +19,37 @@
     <section class="totals">
       <div>
         <span>Prix de vente</span>
-        <strong>{{ a.prixVente != null ? (a.prixVente | number: '1.0-0') : '—' }}</strong>
+        <strong>
+          @if (a.prixVente != null) {
+            {{ a.prixVente | number: '1.0-0' }} Ar
+          } @else {
+            —
+          }
+        </strong>
       </div>
       <div>
         <span>Prix d’achat</span>
-        <strong>{{ a.prixAchat != null ? (a.prixAchat | number: '1.0-0') : '—' }}</strong>
+        <strong>
+          @if (a.prixAchat != null) {
+            {{ a.prixAchat | number: '1.0-0' }} Ar
+          } @else {
+            —
+          }
+        </strong>
       </div>
       <div>
         <span>Stock total</span>
-        <strong>{{ stockTotal() | number: '1.0-2' }}</strong>
+        <strong>
+          {{ stockTotal() | number: '1.0-2' }}
+          {{ a.uniteVenteLibelle || '' }}
+        </strong>
       </div>
       <div [class.is-low]="stockDisponible() <= 0">
         <span>Disponible</span>
-        <strong>{{ stockDisponible() | number: '1.0-2' }}</strong>
+        <strong>
+          {{ stockDisponible() | number: '1.0-2' }}
+          {{ a.uniteVenteLibelle || '' }}
+        </strong>
       </div>
     </section>
 
@@ -40,9 +58,9 @@
         <h2>Fiche</h2>
         <dl class="dl">
           <div><dt>Famille</dt><dd>{{ a.codeFamille || '—' }}</dd></div>
-          <div><dt>Unité</dt><dd>{{ a.uniteVenteLibelle || a.uniteVenteNo || '—' }}</dd></div>
-          <div><dt>Réservé</dt><dd>{{ stockReserve() | number: '1.0-2' }}</dd></div>
-          <div><dt>Commandé</dt><dd>{{ stockCommande() | number: '1.0-2' }}</dd></div>
+          <div><dt>Unité de vente</dt><dd>{{ a.uniteVenteLibelle || a.uniteVenteNo || '—' }}</dd></div>
+          <div><dt>Réservé</dt><dd>{{ stockReserve() | number: '1.0-2' }} {{ a.uniteVenteLibelle || '' }}</dd></div>
+          <div><dt>Commandé</dt><dd>{{ stockCommande() | number: '1.0-2' }} {{ a.uniteVenteLibelle || '' }}</dd></div>
         </dl>
       </section>
 
