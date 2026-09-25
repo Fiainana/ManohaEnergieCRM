@@ -12,6 +12,12 @@ import {
   UpdateDevisRequest,
 } from '../models/devis.model';
 
+export interface EnvoyerDevisEmailRequest {
+  to?: string | null;
+  cc?: string | null;
+  message?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DevisService {
   private readonly http = inject(HttpClient);
@@ -43,7 +49,6 @@ export class DevisService {
       );
   }
 
-  /** PDF binaire (JWT via interceptor). */
   getPdf(numeroPiece: string) {
     return this.http
       .get(`${this.base}/${encodeURIComponent(numeroPiece)}/pdf`, {
@@ -56,7 +61,6 @@ export class DevisService {
           if (!blob || blob.size === 0) {
             throw new Error('PDF vide ou indisponible');
           }
-          // Si l'API renvoie du JSON d'erreur avec content-type pdf mal configuré
           if (blob.type && blob.type.includes('json')) {
             throw new Error('Erreur lors de la génération du PDF');
           }
@@ -71,7 +75,6 @@ export class DevisService {
       );
   }
 
-  /** Télécharge le PDF (fichier local). */
   downloadPdf(numeroPiece: string) {
     return this.getPdf(numeroPiece).pipe(
       map(({ blob, fileName }) => {
@@ -84,6 +87,19 @@ export class DevisService {
         return fileName;
       })
     );
+  }
+
+  /** Envoi PDF par email (API : POST .../envoyer-email). */
+  envoyerEmail(numeroPiece: string, body: EnvoyerDevisEmailRequest = {}) {
+    return this.http
+      .post<ApiResponse<unknown>>(
+        `${this.base}/${encodeURIComponent(numeroPiece)}/envoyer-email`,
+        body
+      )
+      .pipe(
+        map((res) => this.unwrap(res)),
+        catchError((err) => throwError(() => new Error(this.readError(err))))
+      );
   }
 
   create(body: CreateDevisRequest) {
@@ -136,7 +152,6 @@ export class DevisService {
   private readBlobError(err: unknown): string {
     const http = err as HttpErrorResponse;
     if (http?.error instanceof Blob) {
-      // message async non dispo ici ; statut générique
       if (http.status === 404) return 'Devis introuvable pour le PDF';
       if (http.status === 403) return 'Accès PDF refusé';
       if (http.status === 503) return 'Service Sage indisponible';

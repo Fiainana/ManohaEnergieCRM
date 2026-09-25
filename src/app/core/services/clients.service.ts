@@ -8,7 +8,10 @@ import {
   ClientDetailResult,
   ClientListParams,
   ClientListResult,
+  ClientStats,
   CreateClientRequest,
+  DevisClient,
+  DevisClientListResult,
   FactureClientListResult,
   UpdateClientRequest,
 } from '../models/client.model';
@@ -27,28 +30,25 @@ export class ClientsService {
     if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize);
     if (params.inclureSommeil) httpParams = httpParams.set('inclureSommeil', true);
 
-    return this.http
-      .get<ApiResponse<ClientListResult>>(this.base, { params: httpParams })
-      .pipe(
-        map((res) => {
-          if (!res.success || !res.data) {
-            throw new Error(res.message || 'Impossible de charger les clients');
-          }
-          return this.normalizeList(res.data as unknown as Record<string, unknown>);
-        }),
-        catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les clients')))
-      );
+    return this.http.get<ApiResponse<ClientListResult>>(this.base, { params: httpParams }).pipe(
+      map((res) => {
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Impossible de charger les clients');
+        }
+        return this.normalizeList(res.data as unknown as Record<string, unknown>);
+      }),
+      catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les clients')))
+    );
   }
 
   getByNumero(numero: string) {
     return this.http
-      .get<ApiResponse<ClientDetailResult>>(`${this.base}/${encodeURIComponent(numero)}`)
+      .get<ApiResponse<unknown>>(`${this.base}/${encodeURIComponent(numero)}`)
       .pipe(
         map((res) => {
-          if (!res.success || !res.data) {
-            throw new Error(res.message || 'Client introuvable');
-          }
-          return res.data;
+          const data = this.unwrap(res) as Record<string, unknown>;
+          if (!data) throw new Error('Client introuvable');
+          return this.normalizeDetail(data);
         }),
         catchError((err) => throwError(() => this.toError(err, 'Client introuvable')))
       );
@@ -73,6 +73,17 @@ export class ClientsService {
           return res.data;
         }),
         catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les factures')))
+      );
+  }
+
+  listDevis(numero: string, page = 1, pageSize = 20) {
+    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
+
+    return this.http
+      .get<ApiResponse<unknown>>(`${this.base}/${encodeURIComponent(numero)}/devis`, { params })
+      .pipe(
+        map((res) => this.normalizeDevisList(this.unwrap(res))),
+        catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les devis')))
       );
   }
 
@@ -102,7 +113,14 @@ export class ClientsService {
       );
   }
 
-  /** Extrait message + detail du corps ApiResponse en cas d'HttpErrorResponse. */
+  private unwrap(res: unknown): unknown {
+    if (!res || typeof res !== 'object') return res;
+    const o = res as Record<string, unknown>;
+    if ('data' in o && o['data'] != null) return o['data'];
+    if ('Data' in o && o['Data'] != null) return o['Data'];
+    return res;
+  }
+
   private toError(err: unknown, fallback: string): Error {
     if (err instanceof Error && !(err as HttpErrorResponse).status) {
       return err;
@@ -132,7 +150,59 @@ export class ClientsService {
     };
   }
 
+  private normalizeDetail(raw: Record<string, unknown>): ClientDetailResult {
+    const clientRaw = (raw['client'] || raw['Client'] || raw) as Record<string, unknown>;
+    const statsRaw = (raw['stats'] || raw['Stats']) as Record<string, unknown> | undefined;
+    const factures = (raw['dernieresFactures'] || raw['DernieresFactures']) as
+      | FactureClientListResult
+      | undefined;
+    const devis = (raw['derniersDevis'] || raw['DerniersDevis']) as Record<string, unknown> | undefined;
+
+    return {
+      client: this.normalizeClient(clientRaw),
+      stats: statsRaw ? this.normalizeStats(statsRaw) : undefined,
+      dernieresFactures: factures,
+      derniersDevis: devis ? this.normalizeDevisList(devis) : undefined,
+    };
+  }
+
+  private normalizeStats(raw: Record<string, unknown>): ClientStats {
+    return {
+      nbDevis: Number(raw['nbDevis'] ?? raw['NbDevis'] ?? 0),
+      nbFactures: Number(raw['nbFactures'] ?? raw['NbFactures'] ?? 0),
+      caTtcFacture: Number(raw['caTtcFacture'] ?? raw['CaTtcFacture'] ?? 0),
+      resteAPayer: Number(raw['resteAPayer'] ?? raw['ResteAPayer'] ?? 0),
+      nbImpayees: Number(raw['nbImpayees'] ?? raw['NbImpayees'] ?? 0),
+    };
+  }
+
+  private normalizeDevisList(raw: unknown): DevisClientListResult {
+    const bag = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+    const items = (bag['items'] || bag['Items'] || []) as Record<string, unknown>[];
+    return {
+      page: Number(bag['page'] ?? bag['Page'] ?? 1),
+      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? 20),
+      total: Number(bag['total'] ?? bag['Total'] ?? items.length),
+      totalPages: Number(bag['totalPages'] ?? bag['TotalPages'] ?? (items.length ? 1 : 0)),
+      items: items.map(
+        (row): DevisClient => ({
+          numeroPiece: String(row['numeroPiece'] ?? row['NumeroPiece'] ?? ''),
+          dateDocument: (row['dateDocument'] ?? row['DateDocument']) as string | null,
+          reference: (row['reference'] ?? row['Reference']) as string | null,
+          totalHT: (row['totalHT'] ?? row['TotalHT']) as number | undefined,
+          totalTTC: (row['totalTTC'] ?? row['TotalTTC']) as number | undefined,
+          netAPayer: (row['netAPayer'] ?? row['NetAPayer']) as number | undefined,
+          representant: (row['representant'] ?? row['Representant']) as string | null,
+        })
+      ),
+    };
+  }
+
   private normalizeClient(row: Record<string, unknown>): Client {
+    const creditRaw = (row['credit'] || row['Credit']) as Record<string, unknown> | undefined;
+    const encours = Number(row['encours'] ?? row['Encours'] ?? creditRaw?.['encours'] ?? creditRaw?.['Encours'] ?? 0);
+    const sommeil = Boolean(row['sommeil'] ?? row['Sommeil'] ?? creditRaw?.['sommeil']);
+
     return {
       numero: String(row['numero'] ?? row['Numero'] ?? ''),
       intitule: String(row['intitule'] ?? row['Intitule'] ?? ''),
@@ -146,7 +216,34 @@ export class ClientsService {
       email: (row['email'] ?? row['Email']) as string | null,
       siret: (row['siret'] ?? row['Siret']) as string | null,
       identifiant: (row['identifiant'] ?? row['Identifiant']) as string | null,
-      sommeil: Boolean(row['sommeil'] ?? row['Sommeil']),
+      qualite: (row['qualite'] ?? row['Qualite']) as string | null,
+      classement: (row['classement'] ?? row['Classement']) as string | null,
+      sommeil,
+      encours,
+      aCredit: Boolean(row['aCredit'] ?? row['ACredit'] ?? encours > 0.0001),
+      modeReglementNo: (row['modeReglementNo'] ?? row['ModeReglementNo']) as number | null,
+      conditionReglementNo: (row['conditionReglementNo'] ?? row['ConditionReglementNo']) as number | null,
+      modeReglementLibelle: (row['modeReglementLibelle'] ?? row['ModeReglementLibelle']) as string | null,
+      conditionReglementLibelle: (row['conditionReglementLibelle'] ?? row['ConditionReglementLibelle']) as
+        | string
+        | null,
+      representantNo: (row['representantNo'] ?? row['RepresentantNo']) as number | null,
+      representant: (row['representant'] ?? row['Representant']) as string | null,
+      credit: creditRaw
+        ? {
+            encours: Number(creditRaw['encours'] ?? creditRaw['Encours'] ?? encours),
+            aCredit: Boolean(creditRaw['aCredit'] ?? creditRaw['ACredit'] ?? encours > 0.0001),
+            sommeil: Boolean(creditRaw['sommeil'] ?? creditRaw['Sommeil'] ?? sommeil),
+            peutFacturerSansAdmin: Boolean(
+              creditRaw['peutFacturerSansAdmin'] ?? creditRaw['PeutFacturerSansAdmin'] ?? true
+            ),
+          }
+        : {
+            encours,
+            aCredit: encours > 0.0001,
+            sommeil,
+            peutFacturerSansAdmin: encours <= 0.0001 && !sommeil,
+          },
     };
   }
 }

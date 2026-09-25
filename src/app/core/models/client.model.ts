@@ -19,6 +19,8 @@ export interface Client {
   aCredit?: boolean;
   modeReglementNo?: number | null;
   conditionReglementNo?: number | null;
+  modeReglementLibelle?: string | null;
+  conditionReglementLibelle?: string | null;
   representantNo?: number | null;
   representant?: string | null;
   credit?: ClientCredit;
@@ -31,6 +33,14 @@ export interface ClientCredit {
   peutFacturerSansAdmin: boolean;
 }
 
+export interface ClientStats {
+  nbDevis: number;
+  nbFactures: number;
+  caTtcFacture: number;
+  resteAPayer: number;
+  nbImpayees: number;
+}
+
 export interface ClientListResult {
   page: number;
   pageSize: number;
@@ -39,9 +49,29 @@ export interface ClientListResult {
   items: Client[];
 }
 
+export interface DevisClient {
+  numeroPiece: string;
+  dateDocument?: string | null;
+  reference?: string | null;
+  totalHT?: number;
+  totalTTC?: number;
+  netAPayer?: number;
+  representant?: string | null;
+}
+
+export interface DevisClientListResult {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  items: DevisClient[];
+}
+
 export interface ClientDetailResult {
   client: Client;
+  stats?: ClientStats;
   dernieresFactures?: FactureClientListResult;
+  derniersDevis?: DevisClientListResult;
 }
 
 export interface FactureClient {
