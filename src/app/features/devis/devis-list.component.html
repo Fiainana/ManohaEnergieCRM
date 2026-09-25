@@ -1,0 +1,53 @@
+<div class="odo">
+  <header class="odo__bar">
+    <div>
+      <h1>Devis</h1>
+      <p class="text-muted">{{ total() }} devis</p>
+    </div>
+    <a routerLink="/devis/nouveau" class="btn btn--primary">Nouveau</a>
+  </header>
+
+  <div class="odo__search">
+    <input type="search" [(ngModel)]="search" (ngModelChange)="onSearch()" placeholder="Rechercher un devis, client…" />
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  <div class="odo-sheet">
+    @if (loading() && items().length === 0) {
+      <p class="pad text-muted">Chargement…</p>
+    } @else if (items().length === 0) {
+      <p class="pad text-muted">Aucun devis.</p>
+    } @else {
+      <table class="odo-table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Référence</th>
+            <th class="num">Total TTC</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of items(); track d.numeroPiece) {
+            <tr [routerLink]="['/devis', d.numeroPiece]">
+              <td class="strong">{{ d.numeroPiece }}</td>
+              <td>{{ d.clientIntitule || d.clientNumero }}</td>
+              <td>{{ d.dateDocument ? (d.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
+              <td>{{ d.reference || '—' }}</td>
+              <td class="num">{{ d.totalTTC != null ? (d.totalTTC | number: '1.0-0') + ' Ar' : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer class="pager">
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">Précédent</button>
+        <span class="text-muted">page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() + 1)" [disabled]="page() >= totalPages()">Suivant</button>
+      </footer>
+    }
+  </div>
+</div>

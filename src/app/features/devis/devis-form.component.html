@@ -1,0 +1,119 @@
+<div class="odo-form">
+  <a routerLink="/devis" class="back">← Devis</a>
+
+  <header class="statusbar">
+    <div>
+      <p class="eyebrow">{{ isNew() ? 'Nouveau devis' : 'Devis' }}</p>
+      <h1>{{ piece() || 'Brouillon' }}</h1>
+    </div>
+    <div class="statusbar__state">Brouillon</div>
+  </header>
+
+  <div class="actions">
+    <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()">
+      {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+    </button>
+    @if (!isNew()) {
+      <button type="button" class="btn btn--ghost" (click)="facturer()" [disabled]="saving()">Facturer</button>
+      <button type="button" class="btn btn--ghost" (click)="cancel()">Annuler le devis</button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else {
+    <section class="sheet">
+      <div class="sheet__head">
+        <div class="field">
+          <label>Client</label>
+          @if (clientNumero) {
+            <div class="picked">
+              <strong>{{ clientLabel }}</strong>
+              <small>{{ clientNumero }}</small>
+              @if (isNew()) {
+                <button type="button" class="linkish" (click)="clientNumero = ''; clientLabel = ''">changer</button>
+              }
+            </div>
+          } @else {
+            <input [(ngModel)]="clientQuery" (ngModelChange)="onClientType()" placeholder="Rechercher un client…" />
+            @if (clientHits().length) {
+              <ul class="suggest">
+                @for (c of clientHits(); track c.numero) {
+                  <li><button type="button" (click)="pickClient(c)">{{ c.intitule }} · {{ c.numero }}</button></li>
+                }
+              </ul>
+            }
+          }
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="date" />
+        </div>
+        <div class="field">
+          <label>Référence</label>
+          <input [(ngModel)]="reference" maxlength="17" />
+        </div>
+      </div>
+
+      <div class="notebook">
+        <div class="notebook__tab is-on">Lignes de commande</div>
+        <div class="add-prod">
+          <input [(ngModel)]="articleQuery" (ngModelChange)="onArticleType()" placeholder="Ajouter un produit…" />
+          @if (articleHits().length) {
+            <ul class="suggest">
+              @for (a of articleHits(); track a.reference) {
+                <li>
+                  <button type="button" (click)="pickArticle(a)">
+                    {{ a.designation || a.reference }} · {{ a.reference }}
+                    @if (a.prixVente != null) {
+                      · {{ a.prixVente | number: '1.0-0' }} Ar
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <table class="lines">
+          <thead>
+            <tr>
+              <th>Article</th>
+              <th class="num">Qté</th>
+              <th class="num">PU (Ar)</th>
+              <th class="num">Remise %</th>
+              <th class="num">Sous-total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lines; track $index) {
+              <tr>
+                <td>
+                  <div class="prod">
+                    <strong>{{ l.articleReference || '—' }}</strong>
+                    <span>{{ l.designation }}</span>
+                  </div>
+                </td>
+                <td class="num"><input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" /></td>
+                <td class="num"><input type="number" min="0" step="1" [(ngModel)]="l.prixUnitaire" /></td>
+                <td class="num"><input type="number" min="0" max="100" step="0.1" [(ngModel)]="l.remise" /></td>
+                <td class="num strong">{{ lineHt(l) | number: '1.0-0' }} Ar</td>
+                <td><button type="button" class="linkish" (click)="removeLine($index)">×</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <button type="button" class="linkish add" (click)="addLine()">+ Ajouter une ligne</button>
+      </div>
+
+      <aside class="totals">
+        <div><span>Montant HT</span><strong>{{ totalHt() | number: '1.0-0' }} Ar</strong></div>
+      </aside>
+    </section>
+  }
+</div>

@@ -9,12 +9,11 @@ import { ClientFormComponent } from './features/clients/client-form/client-form.
 import { FactureDetailComponent } from './features/factures/facture-detail.component';
 import { ArticlesListComponent } from './features/articles/articles-list.component';
 import { ArticleDetailComponent } from './features/articles/article-detail.component';
+import { DevisListComponent } from './features/devis/devis-list.component';
+import { DevisFormComponent } from './features/devis/devis-form.component';
 
 export const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent,
-  },
+  { path: 'login', component: LoginComponent },
   {
     path: '',
     component: LayoutComponent,
@@ -28,6 +27,9 @@ export const routes: Routes = [
       { path: 'factures/:numeroPiece', component: FactureDetailComponent },
       { path: 'articles', component: ArticlesListComponent },
       { path: 'articles/:reference', component: ArticleDetailComponent },
+      { path: 'devis', component: DevisListComponent },
+      { path: 'devis/nouveau', component: DevisFormComponent },
+      { path: 'devis/:numeroPiece', component: DevisFormComponent },
       { path: '**', redirectTo: '' },
     ],
   },
