@@ -37,7 +37,7 @@
               <button type="button" class="suggest-art" (click)="pickArticle(a)">
                 <span class="suggest-art__main">
                   <strong>{{ a.designation || a.reference }}</strong>
-                  <small>{{ a.reference }}</small>
+                  <small>Réf. {{ a.reference }}</small>
                 </span>
                 <span class="suggest-art__meta">
                   @if (a.stockDisponible != null) {
@@ -63,7 +63,8 @@
       <table class="lines">
         <thead>
           <tr>
-            <th>Article / Désignation</th>
+            <th>Désignation</th>
+            <th>Réf. Sage</th>
             <th class="num">Qté</th>
             <th></th>
           </tr>
@@ -73,16 +74,20 @@
             <tr>
               <td>
                 <div class="prod">
-                  <strong>{{ l.designation || l.articleReference }}</strong>
+                  <strong>{{ l.designation || '—' }}</strong>
                   @if (l.isNew) {
                     <span class="tag tag--new">Nouvel article</span>
-                  } @else {
-                    <span class="prod__ref">{{ l.articleReference }}</span>
-                    @if (l.stockDisponible != null) {
-                      <span class="prod__stock">Stock {{ l.stockDisponible | number: '1.0-0' }}</span>
-                    }
+                  } @else if (l.stockDisponible != null) {
+                    <span class="prod__stock">Stock {{ l.stockDisponible | number: '1.0-0' }}</span>
                   }
                 </div>
+              </td>
+              <td class="mono">
+                @if (l.isNew || !l.articleReference) {
+                  <span class="text-muted">—</span>
+                } @else {
+                  {{ l.articleReference }}
+                }
               </td>
               <td class="num">
                 <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />

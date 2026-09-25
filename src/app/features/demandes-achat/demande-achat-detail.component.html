@@ -73,8 +73,8 @@
         <thead>
           <tr>
             <th>Désignation</th>
+            <th>Réf. Sage</th>
             <th class="num">Qté</th>
-            <th>Article Sage</th>
             <th class="num">Qté reçue</th>
             @if (auth.isAdmin()) {
               <th></th>
@@ -85,13 +85,13 @@
           @for (l of d.lignes; track l.id) {
             <tr>
               <td>
-                <strong>{{ l.designation || l.refFournisseur }}</strong>
+                <strong>{{ l.designation || l.refFournisseur || '—' }}</strong>
                 @if (l.estNouvelArticle || !l.articleSage) {
                   <span class="badge badge--warn" style="margin-left: 0.35rem">Nouveau</span>
                 }
               </td>
+              <td class="mono">{{ l.articleSage || l.articleReference || '—' }}</td>
               <td class="num">{{ l.quantite | number: '1.0-2' }}</td>
-              <td class="mono">{{ l.articleSage || '—' }}</td>
               <td class="num">{{ l.qteRecue != null ? (l.qteRecue | number: '1.0-2') : '—' }}</td>
               @if (auth.isAdmin()) {
                 <td>
