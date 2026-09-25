@@ -1,13 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
 import { UsersService } from '../../core/services/users.service';
 import { UserApp } from '../../core/models/user-app.model';
 
 @Component({
   selector: 'app-users-page',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule],
   templateUrl: './users-page.component.html',
   styleUrl: './users-page.component.scss',
 })
@@ -16,10 +15,13 @@ export class UsersPageComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly saving = signal(false);
-  readonly error = signal<string | null>(null);
-  readonly success = signal<string | null>(null);
+  readonly listError = signal<string | null>(null);
+  readonly formError = signal<string | null>(null);
+  readonly toast = signal<string | null>(null);
   readonly items = signal<UserApp[]>([]);
+  readonly modalOpen = signal(false);
 
+  search = '';
   login = '';
   password = '';
   nom = '';
@@ -33,9 +35,26 @@ export class UsersPageComponent implements OnInit {
     this.reload();
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.modalOpen()) this.closeModal();
+  }
+
+  filtered(): UserApp[] {
+    const q = this.search.trim().toLowerCase();
+    if (!q) return this.items();
+    return this.items().filter((u) =>
+      [u.login, u.nom, u.prenom, u.sageMatricule, this.rolesOf(u)]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(q)
+    );
+  }
+
   reload(): void {
     this.loading.set(true);
-    this.error.set(null);
+    this.listError.set(null);
     this.api.list().subscribe({
       next: (items) => {
         this.items.set(items);
@@ -43,9 +62,20 @@ export class UsersPageComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.message || 'Erreur chargement');
+        this.listError.set(err?.message || 'Erreur chargement');
       },
     });
+  }
+
+  openModal(): void {
+    this.resetForm();
+    this.formError.set(null);
+    this.modalOpen.set(true);
+  }
+
+  closeModal(): void {
+    if (this.saving()) return;
+    this.modalOpen.set(false);
   }
 
   rolesOf(u: UserApp): string {
@@ -53,9 +83,23 @@ export class UsersPageComponent implements OnInit {
     return u.roles || (u.isAdmin ? 'Admin' : '');
   }
 
+  roleList(u: UserApp): string[] {
+    const raw = this.rolesOf(u);
+    return raw
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean);
+  }
+
+  initials(u: UserApp): string {
+    const a = (u.prenom || '').trim();
+    const b = (u.nom || u.login || '?').trim();
+    return ((a[0] || '') + (b[0] || '?')).toUpperCase();
+  }
+
   submit(): void {
     if (!this.login.trim() || !this.nom.trim() || !this.password.trim()) {
-      this.error.set('Login, nom et mot de passe sont obligatoires.');
+      this.formError.set('Login, nom et mot de passe sont obligatoires.');
       return;
     }
     const roles: string[] = [];
@@ -64,8 +108,7 @@ export class UsersPageComponent implements OnInit {
     if (roles.length === 0) roles.push('Commercial');
 
     this.saving.set(true);
-    this.error.set(null);
-    this.success.set(null);
+    this.formError.set(null);
     this.api
       .create({
         login: this.login.trim(),
@@ -81,21 +124,27 @@ export class UsersPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.success.set('Utilisateur créé.');
-          this.login = '';
-          this.password = '';
-          this.nom = '';
-          this.prenom = '';
-          this.matricule = '';
-          this.roleCommercial = true;
-          this.roleAdmin = false;
-          this.actif = true;
+          this.modalOpen.set(false);
+          this.toast.set('Utilisateur créé');
+          setTimeout(() => this.toast.set(null), 2800);
+          this.resetForm();
           this.reload();
         },
         error: (err) => {
           this.saving.set(false);
-          this.error.set(err?.message || 'Création impossible');
+          this.formError.set(err?.message || 'Création impossible');
         },
       });
+  }
+
+  private resetForm(): void {
+    this.login = '';
+    this.password = '';
+    this.nom = '';
+    this.prenom = '';
+    this.matricule = '';
+    this.roleCommercial = true;
+    this.roleAdmin = false;
+    this.actif = true;
   }
 }

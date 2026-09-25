@@ -1,86 +1,132 @@
 <div class="page">
-  <header class="page__header">
+  <header class="toolbar">
     <div>
       <p class="eyebrow">Administration</p>
       <h1>Utilisateurs</h1>
-      <p class="text-muted">Création réservée à l’administrateur. Lie aussi un collaborateur Sage.</p>
     </div>
+    <button type="button" class="btn btn--primary" (click)="openModal()">Nouvel utilisateur</button>
   </header>
 
-  @if (error()) {
-    <div class="alert alert--error">{{ error() }}</div>
-  }
-  @if (success()) {
-    <div class="alert alert--ok">{{ success() }}</div>
-  }
-
-  <div class="grid">
-    <section class="card">
-      <h2>Nouvel utilisateur</h2>
-      <form class="form" (ngSubmit)="submit()">
-        <label>
-          Login
-          <input [(ngModel)]="login" name="login" required autocomplete="off" />
-        </label>
-        <label>
-          Mot de passe
-          <input [(ngModel)]="password" name="password" type="password" required autocomplete="new-password" />
-        </label>
-        <div class="row">
-          <label>
-            Nom
-            <input [(ngModel)]="nom" name="nom" required />
-          </label>
-          <label>
-            Prénom
-            <input [(ngModel)]="prenom" name="prenom" />
-          </label>
-        </div>
-        <label>
-          Matricule Sage (optionnel)
-          <input [(ngModel)]="matricule" name="matricule" maxlength="10" />
-        </label>
-        <div class="checks">
-          <label><input type="checkbox" [(ngModel)]="roleCommercial" name="roleCommercial" /> Commercial</label>
-          <label><input type="checkbox" [(ngModel)]="roleAdmin" name="roleAdmin" /> Admin</label>
-          <label><input type="checkbox" [(ngModel)]="actif" name="actif" /> Actif</label>
-        </div>
-        <button type="submit" class="btn btn--primary" [disabled]="saving()">
-          {{ saving() ? 'Création…' : 'Créer l’utilisateur' }}
-        </button>
-      </form>
-    </section>
-
-    <section class="card">
-      <h2>Comptes existants</h2>
-      @if (loading()) {
-        <p class="text-muted">Chargement…</p>
-      } @else if (items().length === 0) {
-        <p class="text-muted">Aucun utilisateur.</p>
-      } @else {
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Login</th>
-              <th>Nom</th>
-              <th>Rôles</th>
-              <th>Sage</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (u of items(); track u.id || u.login) {
-              <tr>
-                <td>{{ u.login }}</td>
-                <td>{{ u.prenom }} {{ u.nom }}</td>
-                <td>{{ rolesOf(u) || '—' }}</td>
-                <td>{{ u.sageMatricule || '—' }}</td>
-                <td>{{ u.actif === false ? 'Inactif' : 'Actif' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-    </section>
+  <div class="toolbar__filters">
+    <input
+      type="search"
+      [(ngModel)]="search"
+      placeholder="Rechercher un compte, un nom, un rôle…"
+    />
+    <span class="text-muted">{{ filtered().length }} compte{{ filtered().length > 1 ? 's' : '' }}</span>
   </div>
+
+  @if (toast()) {
+    <div class="toast">{{ toast() }}</div>
+  }
+  @if (listError()) {
+    <div class="alert">{{ listError() }}</div>
+  }
+
+  <section class="sheet">
+    @if (loading()) {
+      <p class="empty">Chargement des comptes…</p>
+    } @else if (filtered().length === 0) {
+      <div class="empty">
+        <p>Aucun utilisateur.</p>
+        <button type="button" class="btn btn--primary" (click)="openModal()">Créer le premier compte</button>
+      </div>
+    } @else {
+      <ul class="people">
+        @for (u of filtered(); track u.id || u.login) {
+          <li class="person">
+            <span class="avatar">{{ initials(u) }}</span>
+            <div class="person__main">
+              <strong>{{ u.prenom }} {{ u.nom }}</strong>
+              <span class="login">{{ u.login }}</span>
+            </div>
+            <div class="person__meta">
+              @for (r of roleList(u); track r) {
+                <span class="pill" [class.pill--admin]="r === 'Admin'">{{ r }}</span>
+              }
+              @if (u.sageMatricule) {
+                <span class="pill pill--muted">Sage {{ u.sageMatricule }}</span>
+              }
+            </div>
+            <span class="status" [class.is-off]="u.actif === false">
+              {{ u.actif === false ? 'Inactif' : 'Actif' }}
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
 </div>
+
+@if (modalOpen()) {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+      <header class="modal__head">
+        <div>
+          <p class="eyebrow">Nouveau compte</p>
+          <h2 id="user-modal-title">Ajouter un utilisateur</h2>
+        </div>
+        <button type="button" class="icon-btn" (click)="closeModal()" aria-label="Fermer">×</button>
+      </header>
+
+      @if (formError()) {
+        <div class="alert">{{ formError() }}</div>
+      }
+
+      <form class="modal__body" (ngSubmit)="submit()">
+        <fieldset>
+          <legend>Identité</legend>
+          <div class="row">
+            <label>Nom *<input [(ngModel)]="nom" name="nom" required /></label>
+            <label>Prénom<input [(ngModel)]="prenom" name="prenom" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Accès</legend>
+          <div class="row">
+            <label>Login *<input [(ngModel)]="login" name="login" required autocomplete="off" /></label>
+            <label>Mot de passe *<input [(ngModel)]="password" name="password" type="password" required autocomplete="new-password" /></label>
+          </div>
+          <label>Matricule Sage <span class="hint">optionnel</span>
+            <input [(ngModel)]="matricule" name="matricule" maxlength="10" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Droits</legend>
+          <div class="roles">
+            <label class="choice" [class.on]="roleCommercial">
+              <input type="checkbox" [(ngModel)]="roleCommercial" name="roleCommercial" />
+              <span>
+                <strong>Commercial</strong>
+                <small>Clients, articles, devis</small>
+              </span>
+            </label>
+            <label class="choice" [class.on]="roleAdmin">
+              <input type="checkbox" [(ngModel)]="roleAdmin" name="roleAdmin" />
+              <span>
+                <strong>Administrateur</strong>
+                <small>Gestion des comptes et validations</small>
+              </span>
+            </label>
+            <label class="choice" [class.on]="actif">
+              <input type="checkbox" [(ngModel)]="actif" name="actif" />
+              <span>
+                <strong>Compte actif</strong>
+                <small>Peut se connecter immédiatement</small>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <footer class="modal__foot">
+          <button type="button" class="btn btn--ghost" (click)="closeModal()" [disabled]="saving()">Annuler</button>
+          <button type="submit" class="btn btn--primary" [disabled]="saving()">
+            {{ saving() ? 'Création…' : 'Créer le compte' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+}
