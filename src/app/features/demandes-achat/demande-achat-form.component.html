@@ -3,8 +3,8 @@
 
   <header class="statusbar">
     <div>
-      <p class="eyebrow">Nouvelle demande</p>
-      <h1>Demande d'achat</h1>
+      <p class="eyebrow">Approvisionnement</p>
+      <h1>Nouvelle demande d'achat</h1>
     </div>
   </header>
 
@@ -58,7 +58,10 @@
     </div>
 
     @if (lines.length === 0) {
-      <p class="empty text-muted">Aucun article ajouté. Utilisez la recherche ci-dessus.</p>
+      <div class="empty-box">
+        <p class="empty__title">Aucun article</p>
+        <p class="text-muted">Utilisez la recherche ci-dessus pour ajouter des lignes.</p>
+      </div>
     } @else {
       <table class="lines">
         <thead>
@@ -76,7 +79,7 @@
                 <div class="prod">
                   <strong>{{ l.designation || '—' }}</strong>
                   @if (l.isNew) {
-                    <span class="tag tag--new">Nouvel article</span>
+                    <span class="badge badge--warn">Nouvel article</span>
                   } @else if (l.stockDisponible != null) {
                     <span class="prod__stock">Stock {{ l.stockDisponible | number: '1.0-0' }}</span>
                   }

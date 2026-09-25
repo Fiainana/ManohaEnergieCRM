@@ -1,8 +1,8 @@
 <div class="page">
   @if (clientNumero()) {
-    <a [routerLink]="['/clients', clientNumero()]" class="back-link">← Retour au client</a>
+    <a [routerLink]="['/clients', clientNumero()]" class="back-link">← Client</a>
   } @else {
-    <a routerLink="/clients" class="back-link">← Retour aux clients</a>
+    <a routerLink="/clients" class="back-link">← Clients</a>
   }
 
   @if (loading()) {
@@ -12,9 +12,9 @@
   } @else if (facture(); as f) {
     <header class="page__header">
       <div>
-        <p class="page__code">Facture</p>
-        <h1>{{ f.numeroPiece }}</h1>
-        <p class="text-muted">
+        <p class="eyebrow">Facture</p>
+        <h1 class="mono">{{ f.numeroPiece }}</h1>
+        <p class="text-muted page__sub">
           {{ f.dateDocument ? (f.dateDocument | date: 'dd/MM/yyyy') : '' }}
           @if (f.reference) {
             · {{ f.reference }}
@@ -26,22 +26,22 @@
       </div>
     </header>
 
-    <section class="totals">
+    <section class="totals" aria-label="Totaux">
       <div>
         <span>Total HT</span>
-        <strong>{{ f.totalHT != null ? (f.totalHT | number: '1.0-0') : '—' }}</strong>
+        <strong>{{ f.totalHT != null ? (f.totalHT | number: '1.0-0') + ' Ar' : '—' }}</strong>
       </div>
       <div>
         <span>Total TTC</span>
-        <strong>{{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') : '—' }}</strong>
+        <strong>{{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') + ' Ar' : '—' }}</strong>
       </div>
       <div>
         <span>Réglé</span>
-        <strong>{{ f.montantRegle != null ? (f.montantRegle | number: '1.0-0') : '—' }}</strong>
+        <strong>{{ f.montantRegle != null ? (f.montantRegle | number: '1.0-0') + ' Ar' : '—' }}</strong>
       </div>
       <div [class.is-due]="(f.resteAPayer ?? 0) > 0">
         <span>Reste à payer</span>
-        <strong>{{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') : '—' }}</strong>
+        <strong>{{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') + ' Ar' : '—' }}</strong>
       </div>
     </section>
 
@@ -56,16 +56,16 @@
               <tr>
                 <th>Réf.</th>
                 <th>Désignation</th>
-                <th>Qté</th>
-                <th>PU</th>
-                <th>Remise</th>
-                <th>HT</th>
+                <th class="num">Qté</th>
+                <th class="num">PU</th>
+                <th class="num">Remise</th>
+                <th class="num">HT</th>
               </tr>
             </thead>
             <tbody>
               @for (l of f.lignes; track $index) {
                 <tr>
-                  <td>{{ l.reference || '—' }}</td>
+                  <td class="mono">{{ l.reference || '—' }}</td>
                   <td>{{ l.designation || '—' }}</td>
                   <td class="num">{{ l.quantite != null ? (l.quantite | number: '1.0-2') : '—' }}</td>
                   <td class="num">{{ l.prixUnitaire != null ? (l.prixUnitaire | number: '1.0-0') : '—' }}</td>

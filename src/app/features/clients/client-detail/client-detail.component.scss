@@ -1,16 +1,21 @@
 .page {
   width: 100%;
+  max-width: var(--page-max);
 }
 
 .back-link {
-  display: inline-block;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.85rem;
+  font-size: var(--fs-md);
+  font-weight: 550;
   color: var(--color-text-muted);
   text-decoration: none;
 
   &:hover {
     color: var(--color-primary);
+    text-decoration: none;
   }
 }
 
@@ -18,40 +23,45 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
   margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
 
   h1 {
-    margin: 0.15rem 0 0.5rem;
-    font-size: 1.4rem;
-    font-weight: 650;
+    margin: 0.15rem 0 0.45rem;
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+    font-weight: 700;
   }
 }
 
 .page__code {
   margin: 0;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-family: var(--font-mono);
   color: var(--color-text-muted);
   letter-spacing: 0.02em;
 }
 
 .page__badges {
   display: flex;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .encours-hero {
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1.25rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
-  padding: 1.1rem 1.25rem;
+  padding: 1rem 1.15rem;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
 
   &--warn {
     border-color: #fecaca;
@@ -59,9 +69,9 @@
   }
 
   &__label {
-    margin: 0 0 0.25rem;
-    font-size: 0.72rem;
-    font-weight: 650;
+    margin: 0 0 0.2rem;
+    font-size: var(--fs-xs);
+    font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-text-muted);
@@ -69,7 +79,7 @@
 
   &__value {
     margin: 0;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 750;
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
@@ -78,18 +88,21 @@
   &__meta {
     margin: 0;
     display: flex;
-    gap: 1.5rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
 
     dt {
-      font-size: 0.7rem;
+      font-size: var(--fs-xs);
       color: var(--color-text-muted);
-      font-weight: 550;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     dd {
       margin: 0.15rem 0 0;
-      font-weight: 600;
+      font-weight: 650;
+      font-size: var(--fs-md);
     }
   }
 }
@@ -97,8 +110,8 @@
 .grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
@@ -106,32 +119,41 @@
 }
 
 .card h2 {
-  margin: 0 0 1rem;
-  font-size: 0.95rem;
-  font-weight: 650;
+  margin: 0 0 0.85rem;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .dl {
   margin: 0;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.55rem;
 
   div {
     display: grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: minmax(100px, 120px) 1fr;
     gap: 0.5rem;
-    font-size: 0.875rem;
+    font-size: var(--fs-md);
+
+    @media (max-width: 400px) {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
   }
 
   dt {
     margin: 0;
     color: var(--color-text-muted);
-    font-weight: 500;
+    font-weight: 550;
   }
 
   dd {
     margin: 0;
-    font-weight: 500;
+    font-weight: 600;
+    word-break: break-word;
   }
 }
 
@@ -140,7 +162,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
     margin-bottom: 0.85rem;
 
     h2 {
@@ -150,53 +173,34 @@
 
   &__tabs {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.35rem;
   }
 }
 
 .chip {
-  border: 1px solid var(--color-border);
-  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
   border-radius: 999px;
-  padding: 0.3rem 0.75rem;
+  padding: 0.28rem 0.7rem;
   font: inherit;
-  font-size: 0.8rem;
-  font-weight: 550;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
 
   &.is-on {
-    background: #e30917;
-    border-color: #e30917;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
   }
-}
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-
-  th,
-  td {
-    padding: 0.6rem 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  th {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    background: #fafafa;
-  }
-
-  .num {
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .actions {
-    text-align: right;
-    white-space: nowrap;
+  &:hover:not(.is-on) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 }
 
@@ -210,18 +214,17 @@
   }
 }
 
-.btn--sm {
-  padding: 0.28rem 0.55rem;
-  font-size: 0.78rem;
-}
-
 .pager {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
   padding-top: 0.85rem;
-  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+  font-size: var(--fs-sm);
 
   &__btns {
     display: flex;
@@ -229,38 +232,7 @@
   }
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-
-  &--ok {
-    background: #dcfce7;
-    color: #15803d;
-  }
-
-  &--warn {
-    background: #fef3c7;
-    color: #b45309;
-  }
-
-  &--muted {
-    background: #f5f5f5;
-    color: #737373;
-  }
-}
-
-.alert--error {
-  margin-bottom: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius);
-  color: #b91c1c;
-}
-
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }

@@ -2,7 +2,10 @@
   <a [routerLink]="isEdit() ? ['/clients', numero()] : '/clients'" class="back-link">← Retour</a>
 
   <header class="page__header">
-    <h1>{{ isEdit() ? 'Modifier le client' : 'Nouveau client' }}</h1>
+    <div>
+      <p class="eyebrow">{{ isEdit() ? 'Fiche client' : 'Portefeuille B2B' }}</p>
+      <h1>{{ isEdit() ? 'Modifier le client' : 'Nouveau client' }}</h1>
+    </div>
   </header>
 
   @if (loading()) {
