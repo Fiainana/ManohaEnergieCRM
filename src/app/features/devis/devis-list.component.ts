@@ -42,18 +42,25 @@ export class DevisListComponent implements OnInit {
   load(page = 1): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api.list({ search: this.search.trim() || undefined, page, pageSize: this.pageSize }).subscribe({
-      next: (data) => {
-        this.items.set(data.items ?? []);
-        this.total.set(data.total ?? 0);
-        this.page.set(data.page ?? page);
-        this.totalPages.set(data.totalPages ?? 0);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.error.set(err?.message || 'Erreur chargement devis');
-      },
-    });
+    this.api
+      .list({
+        search: this.search.trim() || undefined,
+        page,
+        pageSize: this.pageSize,
+        mes: false,
+      })
+      .subscribe({
+        next: (data) => {
+          this.items.set(data.items ?? []);
+          this.total.set(data.total ?? 0);
+          this.page.set(data.page ?? page);
+          this.totalPages.set(data.totalPages ?? 0);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.error.set(err?.message || 'Erreur chargement devis');
+        },
+      });
   }
 }
