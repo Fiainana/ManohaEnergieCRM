@@ -72,7 +72,7 @@
       <table class="lines">
         <thead>
           <tr>
-            <th>Réf. fournisseur</th>
+            <th>Désignation</th>
             <th class="num">Qté</th>
             <th>Article Sage</th>
             <th class="num">Qté reçue</th>
@@ -84,7 +84,12 @@
         <tbody>
           @for (l of d.lignes; track l.id) {
             <tr>
-              <td class="strong">{{ l.refFournisseur }}</td>
+              <td>
+                <strong>{{ l.designation || l.refFournisseur }}</strong>
+                @if (l.estNouvelArticle || !l.articleSage) {
+                  <span class="badge badge--warn" style="margin-left: 0.35rem">Nouveau</span>
+                }
+              </td>
               <td class="num">{{ l.quantite | number: '1.0-2' }}</td>
               <td class="mono">{{ l.articleSage || '—' }}</td>
               <td class="num">{{ l.qteRecue != null ? (l.qteRecue | number: '1.0-2') : '—' }}</td>

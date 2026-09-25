@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DemandesAchatService } from '../../core/services/demandes-achat.service';
@@ -18,7 +18,6 @@ import {
 })
 export class DemandeAchatDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly api = inject(DemandesAchatService);
   readonly auth = inject(AuthService);
 
@@ -28,7 +27,6 @@ export class DemandeAchatDetailComponent implements OnInit {
   readonly success = signal<string | null>(null);
   readonly detail = signal<DemandeAchatDetail | null>(null);
 
-  /** Ligne en cours d'édition article (Admin). */
   articleLigneId: number | null = null;
   articleForm = {
     articleReference: '',
@@ -80,8 +78,8 @@ export class DemandeAchatDetailComponent implements OnInit {
   openArticleForm(l: DemandeAchatLigne): void {
     this.articleLigneId = l.id;
     this.articleForm = {
-      articleReference: l.articleSage || l.refFournisseur || '',
-      designation: '',
+      articleReference: l.articleSage || '',
+      designation: l.designation || l.refFournisseur || '',
       prixAchat: 0,
       prixVente: null,
       codeFamille: '',
@@ -106,7 +104,7 @@ export class DemandeAchatDetailComponent implements OnInit {
       return;
     }
     if (this.articleForm.prixAchat < 0) {
-      this.error.set('Prix d\'achat invalide.');
+      this.error.set("Prix d'achat invalide.");
       return;
     }
 
@@ -118,9 +116,7 @@ export class DemandeAchatDetailComponent implements OnInit {
         designation: this.articleForm.designation.trim() || null,
         prixAchat: Number(this.articleForm.prixAchat),
         prixVente:
-          this.articleForm.prixVente != null && this.articleForm.prixVente !== ('' as unknown)
-            ? Number(this.articleForm.prixVente)
-            : null,
+          this.articleForm.prixVente != null ? Number(this.articleForm.prixVente) : null,
         codeFamille: this.articleForm.codeFamille.trim() || null,
         suiviStock: this.articleForm.suiviStock,
         rattacherSiExiste: this.articleForm.rattacherSiExiste,
