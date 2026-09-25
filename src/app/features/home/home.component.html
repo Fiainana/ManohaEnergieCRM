@@ -1,0 +1,165 @@
+<div class="dash">
+  <header class="dash__hero">
+    <div>
+      <p class="eyebrow">Tableau de bord</p>
+      <h1>Bonjour, {{ auth.displayName() || auth.user()?.login }}</h1>
+      <p class="dash__sub text-muted">
+        Espace commercial Manoha Énergie — rôle
+        <strong>{{ auth.roles().join(', ') || 'Utilisateur' }}</strong>
+        @if (data(); as d) {
+          · période {{ d.periode.debut | date: 'dd/MM/yyyy' }} → {{ d.periode.fin | date: 'dd/MM/yyyy' }}
+          @if (d.mesUniquement) {
+            · <span class="badge-mes">Mes chiffres</span>
+          }
+        }
+      </p>
+    </div>
+    <button type="button" class="btn btn--ghost btn--sm" (click)="load()" [disabled]="loading()">
+      {{ loading() ? 'Chargement…' : 'Actualiser' }}
+    </button>
+  </header>
+
+  @if (error()) {
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
+  }
+
+  <!-- KPIs -->
+  @if (loading() && !data()) {
+    <p class="text-muted">Chargement des indicateurs…</p>
+  } @else if (data(); as d) {
+    <section class="kpi-grid" aria-label="Indicateurs">
+      <article class="kpi">
+        <span class="kpi__label">CA facturé (période)</span>
+        <strong class="kpi__value">{{ formatAr(d.factures.periodeCaTtc) }}</strong>
+        <span class="kpi__meta">{{ d.factures.periodeNb }} facture{{ d.factures.periodeNb > 1 ? 's' : '' }}</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi__label">Devis (période)</span>
+        <strong class="kpi__value">{{ d.devis.periodeNb }}</strong>
+        <span class="kpi__meta">{{ formatAr(d.devis.periodeCaTtc) }} TTC</span>
+      </article>
+      <article class="kpi kpi--warn">
+        <span class="kpi__label">Impayés</span>
+        <strong class="kpi__value">{{ formatAr(d.factures.resteAPayer) }}</strong>
+        <span class="kpi__meta">{{ d.factures.impayeesNb }} facture{{ d.factures.impayeesNb > 1 ? 's' : '' }}</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi__label">En attente Admin</span>
+        <strong class="kpi__value">{{ d.devis.enAttenteAdmin }}</strong>
+        <span class="kpi__meta">devis à valider</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi__label">Clients à crédit</span>
+        <strong class="kpi__value">{{ d.clients.avecEncoursNb }}</strong>
+        <span class="kpi__meta">encours {{ formatAr(d.clients.encoursTotal) }}</span>
+      </article>
+    </section>
+
+    <div class="dash__cols">
+      <section class="card">
+        <h2>Factures impayées</h2>
+        @if (!d.facturesImpayees.length) {
+          <p class="text-muted">Aucune facture impayée.</p>
+        } @else {
+          <ul class="mini-list">
+            @for (f of d.facturesImpayees; track f.numeroPiece) {
+              <li>
+                <a [routerLink]="['/factures', f.numeroPiece]">
+                  <span class="mono">{{ f.numeroPiece }}</span>
+                  <span class="text-muted">{{ f.clientIntitule || f.clientNumero }}</span>
+                  <strong>{{ formatAr(f.resteAPayer ?? f.netAPayer) }}</strong>
+                </a>
+              </li>
+            }
+          </ul>
+          <a routerLink="/factures" class="link-more">Voir les factures →</a>
+        }
+      </section>
+
+      <section class="card">
+        <h2>Devis récents</h2>
+        @if (!d.devisRecents.length) {
+          <p class="text-muted">Aucun devis récent.</p>
+        } @else {
+          <ul class="mini-list">
+            @for (dv of d.devisRecents; track dv.numeroPiece) {
+              <li>
+                <a [routerLink]="['/devis', dv.numeroPiece]">
+                  <span class="mono">{{ dv.numeroPiece }}</span>
+                  <span class="text-muted">{{ dv.clientIntitule || dv.clientNumero }}</span>
+                  <strong>{{ formatAr(dv.totalTTC) }}</strong>
+                </a>
+              </li>
+            }
+          </ul>
+          <a routerLink="/devis" class="link-more">Voir les devis →</a>
+        }
+      </section>
+
+      <section class="card">
+        <h2>Top clients (CA période)</h2>
+        @if (!d.topClientsCa.length) {
+          <p class="text-muted">Pas encore de facturation sur la période.</p>
+        } @else {
+          <ul class="mini-list">
+            @for (c of d.topClientsCa; track c.clientNumero) {
+              <li>
+                <a [routerLink]="['/clients', c.clientNumero]">
+                  <span>{{ c.clientIntitule || c.clientNumero }}</span>
+                  <span class="text-muted">{{ c.nbFactures }} FA</span>
+                  <strong>{{ formatAr(c.caTtc) }}</strong>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  }
+
+  <section class="dash__grid" aria-label="Accès rapides">
+    <a routerLink="/clients" class="dash-card">
+      <span class="dash-card__icon dash-card__icon--clients" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13m8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></svg>
+      </span>
+      <span class="dash-card__body">
+        <strong>Clients</strong>
+        <span>Portefeuille B2B & fiches client</span>
+      </span>
+      <span class="dash-card__chev">→</span>
+    </a>
+
+    <a routerLink="/devis" class="dash-card">
+      <span class="dash-card__icon dash-card__icon--devis" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5z"/></svg>
+      </span>
+      <span class="dash-card__body">
+        <strong>Devis</strong>
+        <span>Création, PDF & facturation</span>
+      </span>
+      <span class="dash-card__chev">→</span>
+    </a>
+
+    <a routerLink="/factures" class="dash-card">
+      <span class="dash-card__icon dash-card__icon--fa" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-5 14H7v-2h7zm3-4H7v-2h10zm0-4H7V7h10z"/></svg>
+      </span>
+      <span class="dash-card__body">
+        <strong>Factures</strong>
+        <span>Suivi & impression</span>
+      </span>
+      <span class="dash-card__chev">→</span>
+    </a>
+
+    <a routerLink="/demandes-achat" class="dash-card">
+      <span class="dash-card__icon dash-card__icon--achat" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2M1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2"/></svg>
+      </span>
+      <span class="dash-card__body">
+        <strong>Achats</strong>
+        <span>Demandes & suivi articles</span>
+      </span>
+      <span class="dash-card__chev">→</span>
+    </a>
+  </section>
+</div>

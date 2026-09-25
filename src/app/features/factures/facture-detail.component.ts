@@ -39,8 +39,9 @@ export class FactureDetailComponent implements OnInit {
     this.facturesApi.getByPiece(piece).subscribe({
       next: (data) => {
         this.facture.set(data);
-        if (!this.clientNumero() && data.clientNumero) {
-          this.clientNumero.set(data.clientNumero);
+        const client = data.entete?.clientNumero;
+        if (!this.clientNumero() && client) {
+          this.clientNumero.set(client);
         }
         this.loading.set(false);
       },
@@ -53,15 +54,23 @@ export class FactureDetailComponent implements OnInit {
 
   imprimer(): void {
     const f = this.facture();
-    if (!f?.numeroPiece || this.printing()) return;
+    const piece = f?.entete?.numeroPiece;
+    if (!piece || this.printing()) return;
     this.printing.set(true);
     this.error.set(null);
     this.printMsg.set(null);
-    this.facturesApi.imprimer(f.numeroPiece).subscribe({
+    this.facturesApi.imprimer(piece).subscribe({
       next: (blob) => {
         this.facturesApi.openPrint(blob);
         this.printing.set(false);
-        this.printMsg.set('Document envoyé à l\'impression.');
+        this.printMsg.set("Document envoyé à l'impression.");
+        // Marquer comme déjà imprimée côté UI
+        if (f) {
+          this.facture.set({
+            ...f,
+            entete: { ...f.entete, dejaImprimee: true },
+          });
+        }
       },
       error: (err) => {
         this.printing.set(false);

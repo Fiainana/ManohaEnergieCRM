@@ -8,7 +8,8 @@
     <p class="text-muted">Chargement de la facture…</p>
   } @else if (error() && !facture()) {
     <div class="alert alert--error">{{ error() }}</div>
-  } @else if (facture(); as f) {
+  } @else if (facture(); as doc) {
+    @let f = doc.entete;
     <header class="page__header">
       <div>
         <p class="eyebrow">Facture</p>
@@ -21,9 +22,18 @@
           @if (f.clientIntitule) {
             · {{ f.clientIntitule }}
           }
+          @if (f.dejaImprimee) {
+            · <span class="badge-imprimee">Déjà imprimée</span>
+          }
         </p>
       </div>
-      <button type="button" class="btn btn--primary" (click)="imprimer()" [disabled]="printing()">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="imprimer()"
+        [disabled]="printing()"
+        [title]="f.dejaImprimee ? 'Réimpression réservée à l\'admin' : 'Imprimer le PDF'"
+      >
         {{ printing() ? 'Impression…' : 'Imprimer' }}
       </button>
     </header>
@@ -60,7 +70,7 @@
 
     <section class="card">
       <h2>Lignes</h2>
-      @if (!f.lignes?.length) {
+      @if (!doc.lignes?.length) {
         <p class="text-muted">Aucune ligne détaillée renvoyée par l’API.</p>
       } @else {
         <div class="table-wrap">
@@ -76,9 +86,9 @@
               </tr>
             </thead>
             <tbody>
-              @for (l of f.lignes; track $index) {
+              @for (l of doc.lignes; track $index) {
                 <tr>
-                  <td class="mono">{{ l.reference || '—' }}</td>
+                  <td class="mono">{{ l.reference || l.articleReference || '—' }}</td>
                   <td>{{ l.designation || '—' }}</td>
                   <td class="num">{{ l.quantite != null ? (l.quantite | number: '1.0-2') : '—' }}</td>
                   <td class="num">{{ l.prixUnitaire != null ? (l.prixUnitaire | number: '1.0-0') : '—' }}</td>
