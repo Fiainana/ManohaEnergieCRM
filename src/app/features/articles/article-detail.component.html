@@ -41,11 +41,32 @@
     </section>
 
     <section class="card">
-      <h2>Fiche</h2>
-      <dl class="dl">
-        <div><dt>Référence</dt><dd>{{ a.reference }}</dd></div>
-        <div><dt>Famille</dt><dd>{{ a.codeFamille || '—' }}</dd></div>
-      </dl>
+      <h2>Stock réel par dépôt</h2>
+      @if (stocks().length === 0) {
+        <p class="text-muted">Aucun stock dépôt.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Dépôt</th>
+              <th>Stock réel</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of stocks(); track s.depotNo) {
+              <tr>
+                <td>
+                  {{ s.depotIntitule || s.depotNo }}
+                  @if (s.principal) {
+                    <small class="text-muted"> principal</small>
+                  }
+                </td>
+                <td class="num">{{ (s.stock ?? 0) | number: '1.0-2' }} {{ a.uniteVenteLibelle || '' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </section>
   }
 </div>

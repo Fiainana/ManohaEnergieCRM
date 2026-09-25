@@ -1,6 +1,6 @@
 .page {
   width: 100%;
-  max-width: 720px;
+  max-width: 760px;
 }
 
 .back-link {
@@ -72,24 +72,26 @@
   font-size: 0.95rem;
 }
 
-.dl {
-  margin: 0;
-  display: grid;
-  gap: 0.6rem;
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
 
-  div {
-    display: grid;
-    grid-template-columns: 110px 1fr;
-    font-size: 0.875rem;
+  th,
+  td {
+    padding: 0.55rem 0.4rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
   }
 
-  dt {
+  th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
     color: var(--color-text-muted);
   }
 
-  dd {
-    margin: 0;
-    font-weight: 550;
+  .num {
+    font-variant-numeric: tabular-nums;
   }
 }
 

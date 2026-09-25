@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ArticlesService } from '../../core/services/articles.service';
-import { Article } from '../../core/models/article.model';
+import { Article, ArticleStockDepot } from '../../core/models/article.model';
 
 @Component({
   selector: 'app-article-detail',
@@ -20,6 +20,7 @@ export class ArticleDetailComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly article = signal<Article | null>(null);
   readonly stockDisponible = signal(0);
+  readonly stocks = signal<ArticleStockDepot[]>([]);
 
   ngOnInit(): void {
     const reference = this.route.snapshot.paramMap.get('reference');
@@ -36,9 +37,8 @@ export class ArticleDetailComponent implements OnInit {
     this.articlesApi.getByReference(reference).subscribe({
       next: (data) => {
         this.article.set(data.article);
-        this.stockDisponible.set(
-          data.stockDisponible ?? data.article.stockDisponible ?? 0
-        );
+        this.stockDisponible.set(data.stockDisponible ?? data.article.stockDisponible ?? 0);
+        this.stocks.set(data.stocksParDepot ?? []);
         this.loading.set(false);
       },
       error: (err) => {
