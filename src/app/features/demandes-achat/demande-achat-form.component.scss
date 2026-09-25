@@ -1,0 +1,117 @@
+.odo-form {
+  max-width: 720px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.statusbar {
+  margin-bottom: 0.75rem;
+
+  .eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  h1 {
+    margin: 0.15rem 0 0;
+    font-size: 1.4rem;
+  }
+}
+
+.hint {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.sheet {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+
+  textarea {
+    font: inherit;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    resize: vertical;
+    color: var(--color-text);
+  }
+}
+
+.lines {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.5rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.35rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .num {
+    width: 110px;
+    text-align: right;
+  }
+
+  input {
+    width: 100%;
+    font: inherit;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+  }
+}
+
+.linkish {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font: inherit;
+  padding: 0.25rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.alert--error {
+  margin-bottom: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+}

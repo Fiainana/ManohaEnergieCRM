@@ -1,0 +1,64 @@
+<div class="odo-form">
+  <a routerLink="/demandes-achat" class="back">← Demandes d'achat</a>
+
+  <header class="statusbar">
+    <div>
+      <p class="eyebrow">Nouvelle demande</p>
+      <h1>Demande d'achat</h1>
+    </div>
+  </header>
+
+  <p class="hint text-muted">
+    Indiquez uniquement la <strong>référence fournisseur</strong> et la quantité. Le dépôt et la fiche article Sage
+    sont gérés ensuite par Achats / Admin.
+  </p>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  <section class="sheet">
+    <label class="field">
+      <span>Note (optionnel)</span>
+      <textarea [(ngModel)]="note" rows="2" maxlength="500" placeholder="Client, urgence…"></textarea>
+    </label>
+
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>Réf. fournisseur</th>
+          <th class="num">Quantité</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of lines; track $index) {
+          <tr>
+            <td>
+              <input
+                [(ngModel)]="l.refFournisseur"
+                maxlength="50"
+                placeholder="Référence article fournisseur"
+                autocomplete="off"
+              />
+            </td>
+            <td class="num">
+              <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />
+            </td>
+            <td>
+              <button type="button" class="linkish" (click)="removeLine($index)">×</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <button type="button" class="linkish" (click)="addLine()">+ Ajouter une ligne</button>
+
+    <div class="actions">
+      <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Envoi…' : 'Envoyer la demande' }}
+      </button>
+      <a routerLink="/demandes-achat" class="btn btn--ghost">Annuler</a>
+    </div>
+  </section>
+</div>

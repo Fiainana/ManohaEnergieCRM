@@ -1,0 +1,80 @@
+<div class="odo">
+  <header class="odo__bar">
+    <div>
+      <h1>Demandes d'achat</h1>
+      <p class="text-muted">{{ total() }} demande{{ total() > 1 ? 's' : '' }}</p>
+    </div>
+    <a routerLink="/demandes-achat/nouveau" class="btn btn--primary">Nouvelle demande</a>
+  </header>
+
+  <div class="filters">
+    <select [(ngModel)]="statut" (ngModelChange)="onFilterChange()">
+      @for (s of statuts; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+    @if (auth.isAdmin()) {
+      <label class="scope">
+        <input type="checkbox" [(ngModel)]="scopeAll" (ngModelChange)="onFilterChange()" />
+        Toutes les demandes
+      </label>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  <div class="odo-sheet">
+    @if (loading() && items().length === 0) {
+      <p class="pad text-muted">Chargement…</p>
+    } @else if (items().length === 0) {
+      <p class="pad text-muted">Aucune demande d'achat.</p>
+    } @else {
+      <table class="odo-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Demandeur</th>
+            <th>Lignes</th>
+            <th>Pièce Sage</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of items(); track d.id) {
+            <tr [routerLink]="['/demandes-achat', d.id]">
+              <td class="strong">{{ d.id }}</td>
+              <td>{{ d.dateCreation ? (d.dateCreation | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+              <td>
+                <span class="badge" [class]="statutClass(d.statut)">
+                  {{ d.statutLibelle || d.statut }}
+                </span>
+              </td>
+              <td>{{ d.demandeur?.libelle || d.demandeur?.login || '—' }}</td>
+              <td>{{ d.nbLignes ?? '—' }}</td>
+              <td class="mono">{{ d.pieceSage || '—' }}</td>
+              <td class="note">{{ d.note || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer class="pager">
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">
+          Précédent
+        </button>
+        <span class="text-muted">page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <button
+          class="btn btn--ghost btn--sm"
+          type="button"
+          (click)="load(page() + 1)"
+          [disabled]="page() >= totalPages()"
+        >
+          Suivant
+        </button>
+      </footer>
+    }
+  </div>
+</div>
