@@ -58,6 +58,18 @@ export class DevisFormComponent implements OnInit {
   articleQuery = '';
   readonly clientHits = signal<Client[]>([]);
   readonly articleHits = signal<Article[]>([]);
+  /** Affiche le panneau de création rapide client (style Odoo). */
+  readonly showCreateClient = signal(false);
+  readonly creatingClient = signal(false);
+  readonly createClientError = signal<string | null>(null);
+
+  newClient = {
+    intitule: '',
+    telephone: '',
+    email: '',
+    ville: '',
+    adresse: '',
+  };
 
   constructor() {
     this.clientSearch$
@@ -109,6 +121,8 @@ export class DevisFormComponent implements OnInit {
   }
 
   onClientType(): void {
+    this.showCreateClient.set(false);
+    this.createClientError.set(null);
     this.clientSearch$.next(this.clientQuery.trim());
   }
 
@@ -121,6 +135,56 @@ export class DevisFormComponent implements OnInit {
     this.clientLabel = c.intitule;
     this.clientQuery = '';
     this.clientHits.set([]);
+    this.showCreateClient.set(false);
+  }
+
+  /** Ouvre le panneau de création rapide, prérempli avec la recherche. */
+  openCreateClient(): void {
+    this.newClient = {
+      intitule: this.clientQuery.trim(),
+      telephone: '',
+      email: '',
+      ville: '',
+      adresse: '',
+    };
+    this.createClientError.set(null);
+    this.showCreateClient.set(true);
+    this.clientHits.set([]);
+  }
+
+  closeCreateClient(): void {
+    this.showCreateClient.set(false);
+    this.createClientError.set(null);
+  }
+
+  createClientQuick(): void {
+    const intitule = this.newClient.intitule.trim();
+    if (!intitule) {
+      this.createClientError.set('L\'intitulé est obligatoire.');
+      return;
+    }
+    this.creatingClient.set(true);
+    this.createClientError.set(null);
+
+    this.clientsApi
+      .create({
+        intitule,
+        telephone: this.newClient.telephone.trim() || null,
+        email: this.newClient.email.trim() || null,
+        ville: this.newClient.ville.trim() || null,
+        adresse: this.newClient.adresse.trim() || null,
+      })
+      .subscribe({
+        next: (created) => {
+          this.creatingClient.set(false);
+          this.pickClient(created);
+          this.showCreateClient.set(false);
+        },
+        error: (err) => {
+          this.creatingClient.set(false);
+          this.createClientError.set(err?.message || 'Création du client impossible');
+        },
+      });
   }
 
   pickArticle(a: Article): void {

@@ -79,6 +79,10 @@
     border-radius: 8px;
     font: inherit;
   }
+
+  &--client {
+    z-index: 6;
+  }
 }
 
 .picked {
@@ -124,6 +128,131 @@
   &--articles {
     min-width: min(100%, 420px);
   }
+
+  &--clients {
+    button {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+
+      strong {
+        font-size: 0.875rem;
+      }
+
+      small {
+        font-size: 0.72rem;
+        color: var(--color-text-muted);
+      }
+    }
+  }
+
+  &__create {
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.15rem;
+    padding-top: 0.15rem;
+  }
+}
+
+.create-opt {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.4rem !important;
+  color: var(--color-primary);
+  font-weight: 650;
+  font-size: 0.85rem;
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    background: #fef2f2 !important;
+  }
+}
+
+.quick-create {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  background: #fafafa;
+
+  &__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 650;
+    font-size: 0.85rem;
+    margin-bottom: 0.65rem;
+    color: #1a1a1a;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 0.65rem;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__err {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: #b91c1c;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+    flex-wrap: wrap;
+  }
+}
+
+.qc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  span {
+    font-size: 0.68rem;
+    font-weight: 650;
+    color: var(--color-text-muted);
+
+    em {
+      color: #b91c1c;
+      font-style: normal;
+    }
+  }
+
+  input {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font: inherit;
+    background: #fff;
+  }
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.btn--sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
 }
 
 .suggest-art {

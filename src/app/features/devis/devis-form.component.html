@@ -28,7 +28,7 @@
   } @else {
     <section class="sheet">
       <div class="sheet__head">
-        <div class="field">
+        <div class="field field--client">
           <label>Client</label>
           @if (clientNumero) {
             <div class="picked">
@@ -38,13 +38,72 @@
                 <button type="button" class="linkish" (click)="clientNumero = ''; clientLabel = ''">changer</button>
               }
             </div>
+          } @else if (showCreateClient()) {
+            <div class="quick-create">
+              <div class="quick-create__title">
+                <span>Nouveau client</span>
+                <button type="button" class="linkish" (click)="closeCreateClient()">✕</button>
+              </div>
+              <div class="quick-create__grid">
+                <label class="qc-field qc-field--full">
+                  <span>Intitulé <em>*</em></span>
+                  <input [(ngModel)]="newClient.intitule" maxlength="69" placeholder="Raison sociale" />
+                </label>
+                <label class="qc-field">
+                  <span>Téléphone</span>
+                  <input [(ngModel)]="newClient.telephone" maxlength="21" />
+                </label>
+                <label class="qc-field">
+                  <span>Email</span>
+                  <input type="email" [(ngModel)]="newClient.email" maxlength="69" />
+                </label>
+                <label class="qc-field">
+                  <span>Ville</span>
+                  <input [(ngModel)]="newClient.ville" maxlength="35" />
+                </label>
+                <label class="qc-field">
+                  <span>Adresse</span>
+                  <input [(ngModel)]="newClient.adresse" maxlength="35" />
+                </label>
+              </div>
+              @if (createClientError()) {
+                <p class="quick-create__err">{{ createClientError() }}</p>
+              }
+              <div class="quick-create__actions">
+                <button
+                  type="button"
+                  class="btn btn--primary btn--sm"
+                  (click)="createClientQuick()"
+                  [disabled]="creatingClient()"
+                >
+                  {{ creatingClient() ? 'Création…' : 'Créer et sélectionner' }}
+                </button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="closeCreateClient()">Annuler</button>
+              </div>
+            </div>
           } @else {
-            <input [(ngModel)]="clientQuery" (ngModelChange)="onClientType()" placeholder="Rechercher un client…" />
-            @if (clientHits().length) {
-              <ul class="suggest">
+            <input
+              [(ngModel)]="clientQuery"
+              (ngModelChange)="onClientType()"
+              placeholder="Rechercher un client…"
+              autocomplete="off"
+            />
+            @if (clientQuery.trim().length >= 2) {
+              <ul class="suggest suggest--clients">
                 @for (c of clientHits(); track c.numero) {
-                  <li><button type="button" (click)="pickClient(c)">{{ c.intitule }} · {{ c.numero }}</button></li>
+                  <li>
+                    <button type="button" (click)="pickClient(c)">
+                      <strong>{{ c.intitule }}</strong>
+                      <small>{{ c.numero }}@if (c.ville) { · {{ c.ville }} }</small>
+                    </button>
+                  </li>
                 }
+                <li class="suggest__create">
+                  <button type="button" class="create-opt" (click)="openCreateClient()">
+                    <span class="create-opt__icon">+</span>
+                    Créer « {{ clientQuery.trim() }} »
+                  </button>
+                </li>
               </ul>
             }
           }
