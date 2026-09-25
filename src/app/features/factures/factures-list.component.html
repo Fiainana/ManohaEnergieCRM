@@ -1,0 +1,108 @@
+<div class="page">
+  <header class="page__header">
+    <div>
+      <p class="eyebrow">Ventes</p>
+      <h1>Factures</h1>
+      <p class="text-muted page__count">
+        @if (loading() && items().length === 0) {
+          Chargement…
+        } @else {
+          {{ total() }} facture{{ total() > 1 ? 's' : '' }}
+        }
+      </p>
+    </div>
+  </header>
+
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field filters__field--grow">
+        <label for="fa-search">Recherche</label>
+        <input
+          id="fa-search"
+          type="search"
+          [(ngModel)]="search"
+          (ngModelChange)="onSearch()"
+          placeholder="N° pièce, client, référence…"
+          autocomplete="off"
+        />
+      </div>
+      <label class="filters__check">
+        <input type="checkbox" [(ngModel)]="aujourdhui" (ngModelChange)="onAujourdhui()" />
+        Aujourd'hui seulement
+      </label>
+    </div>
+    <p class="filters__hint text-muted">
+      Impression commerciale : <strong>une seule fois</strong> par facture (admin peut réimprimer).
+    </p>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
+  }
+
+  <div class="odo-sheet">
+    @if (loading() && items().length === 0) {
+      <p class="empty text-muted">Chargement des factures…</p>
+    } @else if (items().length === 0) {
+      <div class="empty">
+        <p class="empty__title">Aucune facture</p>
+        <p class="text-muted">Modifiez la recherche ou le filtre de date.</p>
+      </div>
+    } @else {
+      <table class="odo-table">
+        <thead>
+          <tr>
+            <th>Numéro</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Référence</th>
+            <th class="num">Total TTC</th>
+            <th class="num">Reste</th>
+            <th class="act">Imprimer</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of items(); track f.numeroPiece) {
+            <tr [routerLink]="['/factures', f.numeroPiece]">
+              <td class="strong mono">{{ f.numeroPiece }}</td>
+              <td>{{ f.clientIntitule || f.clientNumero || '—' }}</td>
+              <td>{{ f.dateDocument ? (f.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
+              <td class="text-muted">{{ f.reference || '—' }}</td>
+              <td class="num strong">
+                {{ f.totalTTC != null ? (f.totalTTC | number: '1.0-0') + ' Ar' : '—' }}
+              </td>
+              <td class="num" [class.text-danger]="(f.resteAPayer ?? 0) > 0">
+                {{ f.resteAPayer != null ? (f.resteAPayer | number: '1.0-0') + ' Ar' : '—' }}
+              </td>
+              <td class="act" (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm"
+                  title="Imprimer (1 fois pour commercial)"
+                  (click)="imprimer($event, f.numeroPiece)"
+                  [disabled]="printPiece() === f.numeroPiece"
+                >
+                  {{ printPiece() === f.numeroPiece ? '…' : 'Imprimer' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer class="pager">
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">
+          Précédent
+        </button>
+        <span>page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <button
+          class="btn btn--ghost btn--sm"
+          type="button"
+          (click)="load(page() + 1)"
+          [disabled]="page() >= totalPages()"
+        >
+          Suivant
+        </button>
+      </footer>
+    }
+  </div>
+</div>

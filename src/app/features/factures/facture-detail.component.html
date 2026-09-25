@@ -1,13 +1,12 @@
 <div class="page">
+  <a routerLink="/factures" class="back-link">← Factures</a>
   @if (clientNumero()) {
-    <a [routerLink]="['/clients', clientNumero()]" class="back-link">← Client</a>
-  } @else {
-    <a routerLink="/clients" class="back-link">← Clients</a>
+    <a [routerLink]="['/clients', clientNumero()]" class="back-link back-link--sec">← Client</a>
   }
 
   @if (loading()) {
     <p class="text-muted">Chargement de la facture…</p>
-  } @else if (error()) {
+  } @else if (error() && !facture()) {
     <div class="alert alert--error">{{ error() }}</div>
   } @else if (facture(); as f) {
     <header class="page__header">
@@ -24,7 +23,21 @@
           }
         </p>
       </div>
+      <button type="button" class="btn btn--primary" (click)="imprimer()" [disabled]="printing()">
+        {{ printing() ? 'Impression…' : 'Imprimer' }}
+      </button>
     </header>
+
+    @if (error()) {
+      <div class="alert alert--error" role="alert">{{ error() }}</div>
+    }
+    @if (printMsg()) {
+      <div class="alert alert--success" role="status">{{ printMsg() }}</div>
+    }
+
+    <p class="print-hint text-muted">
+      Commercial : <strong>une seule impression</strong> par facture. L'administrateur peut réimprimer.
+    </p>
 
     <section class="totals" aria-label="Totaux">
       <div>

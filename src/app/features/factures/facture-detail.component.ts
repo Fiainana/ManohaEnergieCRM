@@ -16,7 +16,9 @@ export class FactureDetailComponent implements OnInit {
   private readonly facturesApi = inject(FacturesService);
 
   readonly loading = signal(true);
+  readonly printing = signal(false);
   readonly error = signal<string | null>(null);
+  readonly printMsg = signal<string | null>(null);
   readonly facture = signal<FactureDetail | null>(null);
   readonly clientNumero = signal<string | null>(null);
 
@@ -44,7 +46,26 @@ export class FactureDetailComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.error?.message || err?.message || 'Facture introuvable');
+        this.error.set(err?.message || 'Facture introuvable');
+      },
+    });
+  }
+
+  imprimer(): void {
+    const f = this.facture();
+    if (!f?.numeroPiece || this.printing()) return;
+    this.printing.set(true);
+    this.error.set(null);
+    this.printMsg.set(null);
+    this.facturesApi.imprimer(f.numeroPiece).subscribe({
+      next: (blob) => {
+        this.facturesApi.openPrint(blob);
+        this.printing.set(false);
+        this.printMsg.set('Document envoyé à l\'impression.');
+      },
+      error: (err) => {
+        this.printing.set(false);
+        this.error.set(err?.message || 'Impression impossible');
       },
     });
   }
