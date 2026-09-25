@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevisService } from '../../core/services/devis.service';
+import { AuthService } from '../../core/services/auth.service';
 import { DevisEntete } from '../../core/models/devis.model';
 
 @Component({
@@ -16,6 +17,7 @@ import { DevisEntete } from '../../core/models/devis.model';
 })
 export class DevisListComponent implements OnInit {
   private readonly api = inject(DevisService);
+  private readonly auth = inject(AuthService);
   private readonly search$ = new Subject<string>();
 
   readonly loading = signal(false);
@@ -47,7 +49,7 @@ export class DevisListComponent implements OnInit {
         search: this.search.trim() || undefined,
         page,
         pageSize: this.pageSize,
-        mes: false,
+        mes: !this.auth.isAdmin(),
       })
       .subscribe({
         next: (data) => {
