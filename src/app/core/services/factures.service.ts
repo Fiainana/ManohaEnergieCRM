@@ -3,22 +3,31 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { catchError, map, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response';
-import { FactureDetail, FactureEntete, FactureListResult } from '../models/facture.model';
+import {
+  FactureDetail,
+  FactureEntete,
+  FactureLigne,
+  FactureListResult,
+} from '../models/facture.model';
 
 @Injectable({ providedIn: 'root' })
 export class FacturesService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/b2b/factures`;
 
-  list(opts: {
-    search?: string;
-    client?: string;
-    aujourdhui?: boolean;
-    dateDebut?: string;
-    dateFin?: string;
-    page?: number;
-    pageSize?: number;
-  } = {}) {
+  list(
+    opts: {
+      search?: string;
+      client?: string;
+      aujourdhui?: boolean;
+      dateDebut?: string;
+      dateFin?: string;
+      page?: number;
+      pageSize?: number;
+      mes?: boolean;
+      impayees?: boolean;
+    } = {}
+  ) {
     let params = new HttpParams();
     if (opts.search) params = params.set('search', opts.search);
     if (opts.client) params = params.set('client', opts.client);
@@ -27,6 +36,8 @@ export class FacturesService {
     if (opts.dateFin) params = params.set('dateFin', opts.dateFin);
     if (opts.page) params = params.set('page', opts.page);
     if (opts.pageSize) params = params.set('pageSize', opts.pageSize);
+    if (opts.mes != null) params = params.set('mes', opts.mes);
+    if (opts.impayees) params = params.set('impayees', true);
 
     return this.http.get<ApiResponse<unknown>>(this.base, { params }).pipe(
       map((res) => this.normalizeList(this.unwrap(res))),
@@ -36,31 +47,31 @@ export class FacturesService {
 
   getByPiece(numeroPiece: string) {
     return this.http
-      .get<ApiResponse<FactureDetail>>(`${this.base}/${encodeURIComponent(numeroPiece)}`)
+      .get<ApiResponse<unknown>>(`${this.base}/${encodeURIComponent(numeroPiece)}`)
       .pipe(
         map((res) => {
-          const data = this.unwrap(res) as FactureDetail;
+          const data = this.unwrap(res) as Record<string, unknown>;
           if (!data) throw new Error('Facture introuvable');
-          return this.normalizeDetail(data as unknown as Record<string, unknown>);
+          return this.normalizeDetail(data);
         }),
         catchError((err) => throwError(() => new Error(this.readError(err))))
       );
   }
 
   /**
-   * Impression unique (commercial) / illimitée (admin).
-   * Ouvre le flux serveur dans une fenêtre d'impression — pas un téléchargement PDF libre.
+   * PDF facture — API : GET .../pdf
+   * Commercial = 1 seule impression ; Admin = illimité.
    */
   imprimer(numeroPiece: string) {
     return this.http
-      .get(`${this.base}/${encodeURIComponent(numeroPiece)}/imprimer`, {
+      .get(`${this.base}/${encodeURIComponent(numeroPiece)}/pdf`, {
         responseType: 'blob',
         observe: 'response',
       })
       .pipe(
         map((resp) => {
           const blob = resp.body;
-          if (!blob || blob.size === 0) throw new Error('Document d\'impression vide');
+          if (!blob || blob.size === 0) throw new Error("Document d'impression vide");
           if (blob.type && blob.type.includes('json')) {
             throw new Error('Erreur lors de la génération du document');
           }
@@ -75,7 +86,6 @@ export class FacturesService {
     const url = URL.createObjectURL(blob);
     const w = window.open(url, '_blank', 'noopener,noreferrer');
     if (!w) {
-      // Popup bloquée : fallback lien temporaire
       const a = document.createElement('a');
       a.href = url;
       a.target = '_blank';
@@ -84,7 +94,6 @@ export class FacturesService {
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
       return;
     }
-    // Laisse le viewer PDF native déclencher print si possible
     const tryPrint = () => {
       try {
         w.focus();
@@ -144,10 +153,11 @@ export class FacturesService {
   }
 
   private normalizeDetail(raw: Record<string, unknown>): FactureDetail {
-    const lignes = (raw['lignes'] || raw['Lignes'] || []) as FactureDetail['lignes'];
+    const enteteRaw = (raw['entete'] || raw['Entete'] || raw) as Record<string, unknown>;
+    const lignesRaw = (raw['lignes'] || raw['Lignes'] || []) as Record<string, unknown>[];
     return {
-      ...this.normalizeEntete(raw),
-      lignes,
+      entete: this.normalizeEntete(enteteRaw),
+      lignes: lignesRaw.map((l) => this.normalizeLigne(l)),
     };
   }
 
@@ -157,12 +167,32 @@ export class FacturesService {
       dateDocument: (row['dateDocument'] ?? row['DateDocument']) as string | null,
       reference: (row['reference'] ?? row['Reference']) as string | null,
       clientNumero: (row['clientNumero'] ?? row['ClientNumero'] ?? row['numeroClient']) as string | null,
-      clientIntitule: (row['clientIntitule'] ?? row['ClientIntitule'] ?? row['intitule']) as string | null,
+      clientIntitule: (row['clientIntitule'] ?? row['ClientIntitule'] ?? row['intitule']) as
+        | string
+        | null,
       totalHT: (row['totalHT'] ?? row['TotalHT']) as number | null,
       totalTTC: (row['totalTTC'] ?? row['TotalTTC']) as number | null,
       netAPayer: (row['netAPayer'] ?? row['NetAPayer']) as number | null,
       montantRegle: (row['montantRegle'] ?? row['MontantRegle']) as number | null,
       resteAPayer: (row['resteAPayer'] ?? row['ResteAPayer']) as number | null,
+      representant: (row['representant'] ?? row['Representant']) as string | null,
+      dejaImprimee: Boolean(row['dejaImprimee'] ?? row['DejaImprimee']),
+    };
+  }
+
+  private normalizeLigne(row: Record<string, unknown>): FactureLigne {
+    return {
+      articleReference: (row['articleReference'] ?? row['ArticleReference']) as string | null,
+      reference: (row['articleReference'] ?? row['ArticleReference'] ?? row['reference']) as
+        | string
+        | null,
+      designation: (row['designation'] ?? row['Designation']) as string | null,
+      quantite: (row['quantite'] ?? row['Quantite']) as number | null,
+      prixUnitaire: (row['prixUnitaire'] ?? row['PrixUnitaire']) as number | null,
+      remisePourcent: (row['remisePourcent'] ?? row['RemisePourcent']) as number | null,
+      remise: (row['remisePourcent'] ?? row['RemisePourcent'] ?? row['remise']) as number | null,
+      montantHT: (row['montantHT'] ?? row['MontantHT']) as number | null,
+      montantTTC: (row['montantTTC'] ?? row['MontantTTC']) as number | null,
     };
   }
 }
