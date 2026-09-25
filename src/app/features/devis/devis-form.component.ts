@@ -18,6 +18,8 @@ interface LineDraft {
   prixUnitaire: number | null;
   remise: number | null;
   montantTTC: number | null;
+  /** Stock disponible au moment du choix (info UI uniquement). */
+  stockDisponible?: number | null;
 }
 
 @Component({
@@ -94,6 +96,7 @@ export class DevisFormComponent implements OnInit {
           prixUnitaire: l.prixUnitaire ?? null,
           remise: l.remisePourcent ?? null,
           montantTTC: l.montantTTC ?? null,
+          stockDisponible: null,
         }));
         if (this.lines.length === 0) this.addLine();
         this.loading.set(false);
@@ -129,6 +132,7 @@ export class DevisFormComponent implements OnInit {
       prixUnitaire: a.prixVente ?? null,
       remise: null,
       montantTTC: null,
+      stockDisponible: a.stockDisponible ?? null,
     };
     if (empty) Object.assign(empty, line);
     else this.lines = [...this.lines, line];
@@ -139,7 +143,15 @@ export class DevisFormComponent implements OnInit {
   addLine(): void {
     this.lines = [
       ...this.lines,
-      { articleReference: '', designation: '', quantite: 1, prixUnitaire: null, remise: null, montantTTC: null },
+      {
+        articleReference: '',
+        designation: '',
+        quantite: 1,
+        prixUnitaire: null,
+        remise: null,
+        montantTTC: null,
+        stockDisponible: null,
+      },
     ];
   }
 
@@ -276,7 +288,7 @@ export class DevisFormComponent implements OnInit {
       this.articleHits.set([]);
       return;
     }
-    this.articlesApi.list({ search: q, page: 1, pageSize: 8 }).subscribe({
+    this.articlesApi.list({ search: q, page: 1, pageSize: 10 }).subscribe({
       next: (data) => this.articleHits.set(data.items ?? []),
       error: () => this.articleHits.set([]),
     });

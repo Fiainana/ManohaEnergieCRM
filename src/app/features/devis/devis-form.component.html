@@ -62,16 +62,38 @@
       <div class="notebook">
         <div class="notebook__tab is-on">Lignes de commande</div>
         <div class="add-prod">
-          <input [(ngModel)]="articleQuery" (ngModelChange)="onArticleType()" placeholder="Ajouter un produit…" />
+          <input
+            [(ngModel)]="articleQuery"
+            (ngModelChange)="onArticleType()"
+            placeholder="Rechercher un article (réf. ou désignation)…"
+            autocomplete="off"
+          />
           @if (articleHits().length) {
-            <ul class="suggest">
+            <ul class="suggest suggest--articles">
               @for (a of articleHits(); track a.reference) {
                 <li>
-                  <button type="button" (click)="pickArticle(a)">
-                    {{ a.designation || a.reference }} · {{ a.reference }}
-                    @if (a.prixVente != null) {
-                      · {{ a.prixVente | number: '1.0-0' }} Ar
-                    }
+                  <button type="button" class="suggest-art" (click)="pickArticle(a)">
+                    <span class="suggest-art__main">
+                      <strong class="suggest-art__design">{{ a.designation || a.reference }}</strong>
+                      <small class="suggest-art__ref">{{ a.reference }}</small>
+                    </span>
+                    <span class="suggest-art__meta">
+                      <span class="suggest-art__price">
+                        @if (a.prixVente != null) {
+                          {{ a.prixVente | number: '1.0-0' }} Ar
+                        } @else {
+                          —
+                        }
+                      </span>
+                      <span
+                        class="suggest-art__stock"
+                        [class.stock--ok]="(a.stockDisponible ?? 0) > 5"
+                        [class.stock--low]="(a.stockDisponible ?? 0) > 0 && (a.stockDisponible ?? 0) <= 5"
+                        [class.stock--out]="(a.stockDisponible ?? 0) <= 0"
+                      >
+                        Stock {{ a.stockDisponible != null ? (a.stockDisponible | number: '1.0-0') : '—' }}
+                      </span>
+                    </span>
                   </button>
                 </li>
               }
@@ -95,8 +117,20 @@
               <tr>
                 <td>
                   <div class="prod">
-                    <strong>{{ l.articleReference || '—' }}</strong>
-                    <span>{{ l.designation }}</span>
+                    <strong>{{ l.designation || l.articleReference || '—' }}</strong>
+                    @if (l.articleReference) {
+                      <span class="prod__ref">{{ l.articleReference }}</span>
+                    }
+                    @if (l.stockDisponible != null) {
+                      <span
+                        class="prod__stock"
+                        [class.stock--ok]="l.stockDisponible > 5"
+                        [class.stock--low]="l.stockDisponible > 0 && l.stockDisponible <= 5"
+                        [class.stock--out]="l.stockDisponible <= 0"
+                      >
+                        Stock {{ l.stockDisponible | number: '1.0-0' }}
+                      </span>
+                    }
                   </div>
                 </td>
                 <td class="num"><input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" /></td>
