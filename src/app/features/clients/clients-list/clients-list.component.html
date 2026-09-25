@@ -1,114 +1,133 @@
 <div class="page">
   <header class="page__header">
     <div>
+      <p class="eyebrow">Portefeuille B2B</p>
       <h1>Clients</h1>
-      <p class="text-muted">Portefeuille clients B2B</p>
+      <p class="text-muted page__count">
+        @if (loading() && items().length === 0) {
+          Chargement du portefeuille…
+        } @else {
+          {{ total() }} client{{ total() > 1 ? 's' : '' }}
+        }
+      </p>
     </div>
     @if (canWrite()) {
-      <a routerLink="/clients/nouveau" class="btn btn--primary">+ Nouveau client</a>
+      <a routerLink="/clients/nouveau" class="btn btn--primary">
+        <span class="plus">+</span> Nouveau client
+      </a>
     }
   </header>
 
   <div class="card filters">
     <div class="filters__row">
-      <div class="filters__field">
+      <div class="filters__field filters__field--grow">
         <label for="search">Recherche</label>
-        <input
-          id="search"
-          type="search"
-          [(ngModel)]="search"
-          (keyup.enter)="onSearch()"
-          placeholder="N°, nom, téléphone, email…"
-        />
+        <div class="search-wrap">
+          <svg class="search-wrap__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"
+            />
+          </svg>
+          <input
+            id="search"
+            type="search"
+            [(ngModel)]="search"
+            (ngModelChange)="onSearchInput()"
+            placeholder="N°, nom, téléphone, email…"
+            autocomplete="off"
+          />
+        </div>
       </div>
       <div class="filters__field">
         <label for="ville">Ville</label>
-        <input id="ville" type="text" [(ngModel)]="ville" (keyup.enter)="onSearch()" placeholder="Antananarivo…" />
+        <input
+          id="ville"
+          type="text"
+          [(ngModel)]="ville"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Antananarivo…"
+          autocomplete="off"
+        />
       </div>
       <label class="filters__check">
-        <input type="checkbox" [(ngModel)]="inclureSommeil" (change)="onSearch()" />
+        <input type="checkbox" [(ngModel)]="inclureSommeil" (change)="onSommeilChange()" />
         Inclure sommeil
       </label>
-      <div class="filters__actions">
-        <button type="button" class="btn btn--primary" (click)="onSearch()" [disabled]="loading()">
-          Rechercher
-        </button>
-        <button type="button" class="btn btn--ghost" (click)="clearFilters()">Réinitialiser</button>
-      </div>
+      <button type="button" class="btn btn--ghost" (click)="clearFilters()">Réinitialiser</button>
     </div>
+    <p class="filters__hint text-muted">La recherche se lance automatiquement pendant la saisie.</p>
   </div>
 
   @if (error()) {
     <div class="alert alert--error" role="alert">{{ error() }}</div>
   }
 
-  <div class="card table-card">
-    @if (loading()) {
-      <p class="table-card__state">Chargement…</p>
-    } @else if (items().length === 0) {
-      <p class="table-card__state text-muted">Aucun client trouvé.</p>
-    } @else {
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>N°</th>
-              <th>Intitulé</th>
-              <th>Ville</th>
-              <th>Téléphone</th>
-              <th>Encours</th>
-              <th>Statut</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of items(); track c.numero) {
-              <tr [class.is-sommeil]="c.sommeil">
-                <td>
-                  <a [routerLink]="['/clients', c.numero]" class="link-strong">{{ c.numero }}</a>
-                </td>
-                <td>{{ c.intitule }}</td>
-                <td>{{ c.ville || '—' }}</td>
-                <td>{{ c.telephone || '—' }}</td>
-                <td class="num" [class.text-danger]="(c.encours ?? 0) > 0">
-                  {{ c.encours != null ? (c.encours | number: '1.0-0') : '—' }}
-                </td>
-                <td>
-                  @if (c.sommeil) {
-                    <span class="badge badge--muted">Sommeil</span>
-                  } @else if ((c.encours ?? 0) > 0) {
-                    <span class="badge badge--warn">À crédit</span>
-                  } @else {
-                    <span class="badge badge--ok">Actif</span>
-                  }
-                </td>
-                <td class="actions">
-                  <a [routerLink]="['/clients', c.numero]" class="btn btn--ghost btn--sm">Voir</a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+  <div class="list-card">
+    @if (loading() && items().length === 0) {
+      <div class="skeleton-list" aria-hidden="true">
+        @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
+          <div class="skeleton-row">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        }
       </div>
+    } @else if (items().length === 0) {
+      <div class="empty">
+        <p class="empty__title">Aucun client trouvé</p>
+        <p class="text-muted">Modifiez la recherche ou réinitialisez les filtres.</p>
+      </div>
+    } @else {
+      <ul class="client-list">
+        @for (c of items(); track c.numero) {
+          <li class="client-row" [class.is-sommeil]="c.sommeil">
+            <a [routerLink]="['/clients', c.numero]" class="client-row__link">
+              <span class="avatar" [class.avatar--muted]="c.sommeil">{{ initials(c) }}</span>
+              <span class="client-row__main">
+                <span class="client-row__title">{{ c.intitule }}</span>
+                <span class="client-row__meta">
+                  <span class="mono">{{ c.numero }}</span>
+                  @if (c.ville) {
+                    <span>· {{ c.ville }}</span>
+                  }
+                  @if (c.telephone) {
+                    <span>· {{ c.telephone }}</span>
+                  }
+                </span>
+              </span>
+              <span class="client-row__side">
+                <span class="encours" [class.text-danger]="(c.encours ?? 0) > 0">
+                  {{ c.encours != null ? (c.encours | number: '1.0-0') : '—' }}
+                  <small>encours</small>
+                </span>
+                @if (c.sommeil) {
+                  <span class="badge badge--muted">Sommeil</span>
+                } @else if ((c.encours ?? 0) > 0) {
+                  <span class="badge badge--warn">À crédit</span>
+                } @else {
+                  <span class="badge badge--ok">Actif</span>
+                }
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
 
-      <footer class="pager">
-        <span class="text-muted">
-          {{ total() }} client{{ total() > 1 ? 's' : '' }} — page {{ page() }} / {{ totalPages() || 1 }}
-        </span>
-        <div class="pager__btns">
-          <button type="button" class="btn btn--ghost btn--sm" (click)="prevPage()" [disabled]="page() <= 1">
-            Précédent
-          </button>
-          <button
-            type="button"
-            class="btn btn--ghost btn--sm"
-            (click)="nextPage()"
-            [disabled]="page() >= totalPages()"
-          >
-            Suivant
-          </button>
-        </div>
-      </footer>
+      <div class="list-footer">
+        @if (loadingMore()) {
+          <p class="text-muted">Chargement…</p>
+        } @else if (!hasMore()) {
+          <p class="text-muted">Fin de la liste — {{ items().length }} / {{ total() }}</p>
+        } @else {
+          <p class="text-muted">{{ items().length }} / {{ total() }} clients affichés</p>
+        }
+      </div>
     }
   </div>
+
+  <div #sentinel class="sentinel" aria-hidden="true"></div>
 </div>
