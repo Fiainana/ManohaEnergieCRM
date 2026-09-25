@@ -1,35 +1,51 @@
-<div class="odo">
-  <header class="odo__bar">
+<div class="page">
+  <header class="page__header">
     <div>
+      <p class="eyebrow">Approvisionnement</p>
       <h1>Demandes d'achat</h1>
-      <p class="text-muted">{{ total() }} demande{{ total() > 1 ? 's' : '' }}</p>
+      <p class="text-muted page__count">
+        @if (loading() && items().length === 0) {
+          Chargement…
+        } @else {
+          {{ total() }} demande{{ total() > 1 ? 's' : '' }}
+        }
+      </p>
     </div>
-    <a routerLink="/demandes-achat/nouveau" class="btn btn--primary">Nouvelle demande</a>
+    <a routerLink="/demandes-achat/nouveau" class="btn btn--primary">+ Nouvelle demande</a>
   </header>
 
-  <div class="filters">
-    <select [(ngModel)]="statut" (ngModelChange)="onFilterChange()">
-      @for (s of statuts; track s.value) {
-        <option [value]="s.value">{{ s.label }}</option>
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field">
+        <label for="da-statut">Statut</label>
+        <select id="da-statut" [(ngModel)]="statut" (ngModelChange)="onFilterChange()">
+          @for (s of statuts; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+      @if (auth.isAdmin()) {
+        <label class="filters__check">
+          <input type="checkbox" [(ngModel)]="scopeAll" (ngModelChange)="onFilterChange()" />
+          Toutes les demandes
+        </label>
       }
-    </select>
-    @if (auth.isAdmin()) {
-      <label class="scope">
-        <input type="checkbox" [(ngModel)]="scopeAll" (ngModelChange)="onFilterChange()" />
-        Toutes les demandes
-      </label>
-    }
+    </div>
   </div>
 
   @if (error()) {
-    <div class="alert alert--error">{{ error() }}</div>
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
   }
 
   <div class="odo-sheet">
     @if (loading() && items().length === 0) {
-      <p class="pad text-muted">Chargement…</p>
+      <p class="empty text-muted">Chargement des demandes…</p>
     } @else if (items().length === 0) {
-      <p class="pad text-muted">Aucune demande d'achat.</p>
+      <div class="empty">
+        <p class="empty__title">Aucune demande d'achat</p>
+        <p class="text-muted">Créez une demande ou changez le filtre de statut.</p>
+        <a routerLink="/demandes-achat/nouveau" class="btn btn--primary">Nouvelle demande</a>
+      </div>
     } @else {
       <table class="odo-table">
         <thead>
@@ -38,7 +54,7 @@
             <th>Date</th>
             <th>Statut</th>
             <th>Demandeur</th>
-            <th>Lignes</th>
+            <th class="num">Lignes</th>
             <th>Pièce Sage</th>
             <th>Note</th>
           </tr>
@@ -54,9 +70,9 @@
                 </span>
               </td>
               <td>{{ d.demandeur?.libelle || d.demandeur?.login || '—' }}</td>
-              <td>{{ d.nbLignes ?? '—' }}</td>
+              <td class="num">{{ d.nbLignes ?? '—' }}</td>
               <td class="mono">{{ d.pieceSage || '—' }}</td>
-              <td class="note">{{ d.note || '—' }}</td>
+              <td class="note text-muted">{{ d.note || '—' }}</td>
             </tr>
           }
         </tbody>
@@ -65,7 +81,7 @@
         <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">
           Précédent
         </button>
-        <span class="text-muted">page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <span>page {{ page() }} / {{ totalPages() || 1 }}</span>
         <button
           class="btn btn--ghost btn--sm"
           type="button"

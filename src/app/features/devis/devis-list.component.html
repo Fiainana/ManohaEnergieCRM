@@ -1,25 +1,48 @@
-<div class="odo">
-  <header class="odo__bar">
+<div class="page">
+  <header class="page__header">
     <div>
+      <p class="eyebrow">Ventes</p>
       <h1>Devis</h1>
-      <p class="text-muted">{{ total() }} devis</p>
+      <p class="text-muted page__count">
+        @if (loading() && items().length === 0) {
+          Chargement…
+        } @else {
+          {{ total() }} devis
+        }
+      </p>
     </div>
-    <a routerLink="/devis/nouveau" class="btn btn--primary">Nouveau</a>
+    <a routerLink="/devis/nouveau" class="btn btn--primary">+ Nouveau devis</a>
   </header>
 
-  <div class="odo__search">
-    <input type="search" [(ngModel)]="search" (ngModelChange)="onSearch()" placeholder="Rechercher un devis, client…" />
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field filters__field--grow">
+        <label for="devis-search">Recherche</label>
+        <input
+          id="devis-search"
+          type="search"
+          [(ngModel)]="search"
+          (ngModelChange)="onSearch()"
+          placeholder="N° pièce, client, référence…"
+          autocomplete="off"
+        />
+      </div>
+    </div>
   </div>
 
   @if (error()) {
-    <div class="alert alert--error">{{ error() }}</div>
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
   }
 
   <div class="odo-sheet">
     @if (loading() && items().length === 0) {
-      <p class="pad text-muted">Chargement…</p>
+      <p class="empty text-muted">Chargement des devis…</p>
     } @else if (items().length === 0) {
-      <p class="pad text-muted">Aucun devis.</p>
+      <div class="empty">
+        <p class="empty__title">Aucun devis</p>
+        <p class="text-muted">Créez un devis ou modifiez la recherche.</p>
+        <a routerLink="/devis/nouveau" class="btn btn--primary">Nouveau devis</a>
+      </div>
     } @else {
       <table class="odo-table">
         <thead>
@@ -35,15 +58,17 @@
         <tbody>
           @for (d of items(); track d.numeroPiece) {
             <tr [routerLink]="['/devis', d.numeroPiece]">
-              <td class="strong">{{ d.numeroPiece }}</td>
-              <td>{{ d.clientIntitule || d.clientNumero }}</td>
+              <td class="strong mono">{{ d.numeroPiece }}</td>
+              <td>{{ d.clientIntitule || d.clientNumero || '—' }}</td>
               <td>{{ d.dateDocument ? (d.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
-              <td>{{ d.reference || '—' }}</td>
-              <td class="num">{{ d.totalTTC != null ? (d.totalTTC | number: '1.0-0') + ' Ar' : '—' }}</td>
+              <td class="text-muted">{{ d.reference || '—' }}</td>
+              <td class="num strong">
+                {{ d.totalTTC != null ? (d.totalTTC | number: '1.0-0') + ' Ar' : '—' }}
+              </td>
               <td class="act" (click)="$event.stopPropagation()">
                 <button
                   type="button"
-                  class="pdf-btn"
+                  class="btn btn--ghost btn--sm pdf-btn"
                   title="Exporter PDF"
                   (click)="exportPdf($event, d.numeroPiece)"
                   [disabled]="pdfPiece() === d.numeroPiece"
@@ -56,9 +81,18 @@
         </tbody>
       </table>
       <footer class="pager">
-        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">Précédent</button>
-        <span class="text-muted">page {{ page() }} / {{ totalPages() || 1 }}</span>
-        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() + 1)" [disabled]="page() >= totalPages()">Suivant</button>
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">
+          Précédent
+        </button>
+        <span>page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <button
+          class="btn btn--ghost btn--sm"
+          type="button"
+          (click)="load(page() + 1)"
+          [disabled]="page() >= totalPages()"
+        >
+          Suivant
+        </button>
       </footer>
     }
   </div>
