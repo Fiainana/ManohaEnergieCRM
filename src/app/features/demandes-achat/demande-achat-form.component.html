@@ -9,8 +9,8 @@
   </header>
 
   <p class="hint text-muted">
-    Indiquez uniquement la <strong>référence fournisseur</strong> et la quantité. Le dépôt et la fiche article Sage
-    sont gérés ensuite par Achats / Admin.
+    Recherchez un <strong>article Sage</strong>. S'il n'existe pas, saisissez uniquement la
+    <strong>désignation</strong> — Achats créera la fiche ensuite.
   </p>
 
   @if (error()) {
@@ -23,36 +23,78 @@
       <textarea [(ngModel)]="note" rows="2" maxlength="500" placeholder="Client, urgence…"></textarea>
     </label>
 
-    <table class="lines">
-      <thead>
-        <tr>
-          <th>Réf. fournisseur</th>
-          <th class="num">Quantité</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (l of lines; track $index) {
+    <div class="add-prod">
+      <input
+        [(ngModel)]="articleQuery"
+        (ngModelChange)="onArticleType()"
+        placeholder="Rechercher un article (réf. ou désignation)…"
+        autocomplete="off"
+      />
+      @if (articleQuery.trim().length >= 2) {
+        <ul class="suggest">
+          @for (a of articleHits(); track a.reference) {
+            <li>
+              <button type="button" class="suggest-art" (click)="pickArticle(a)">
+                <span class="suggest-art__main">
+                  <strong>{{ a.designation || a.reference }}</strong>
+                  <small>{{ a.reference }}</small>
+                </span>
+                <span class="suggest-art__meta">
+                  @if (a.stockDisponible != null) {
+                    <span>Stock {{ a.stockDisponible | number: '1.0-0' }}</span>
+                  }
+                </span>
+              </button>
+            </li>
+          }
+          <li class="suggest__create">
+            <button type="button" class="create-opt" (click)="addNewDesignation()">
+              <span class="create-opt__icon">+</span>
+              Article inexistant — demander « {{ articleQuery.trim() }} »
+            </button>
+          </li>
+        </ul>
+      }
+    </div>
+
+    @if (lines.length === 0) {
+      <p class="empty text-muted">Aucun article ajouté. Utilisez la recherche ci-dessus.</p>
+    } @else {
+      <table class="lines">
+        <thead>
           <tr>
-            <td>
-              <input
-                [(ngModel)]="l.refFournisseur"
-                maxlength="50"
-                placeholder="Référence article fournisseur"
-                autocomplete="off"
-              />
-            </td>
-            <td class="num">
-              <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />
-            </td>
-            <td>
-              <button type="button" class="linkish" (click)="removeLine($index)">×</button>
-            </td>
+            <th>Article / Désignation</th>
+            <th class="num">Qté</th>
+            <th></th>
           </tr>
-        }
-      </tbody>
-    </table>
-    <button type="button" class="linkish" (click)="addLine()">+ Ajouter une ligne</button>
+        </thead>
+        <tbody>
+          @for (l of lines; track $index) {
+            <tr>
+              <td>
+                <div class="prod">
+                  <strong>{{ l.designation || l.articleReference }}</strong>
+                  @if (l.isNew) {
+                    <span class="tag tag--new">Nouvel article</span>
+                  } @else {
+                    <span class="prod__ref">{{ l.articleReference }}</span>
+                    @if (l.stockDisponible != null) {
+                      <span class="prod__stock">Stock {{ l.stockDisponible | number: '1.0-0' }}</span>
+                    }
+                  }
+                </div>
+              </td>
+              <td class="num">
+                <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />
+              </td>
+              <td>
+                <button type="button" class="linkish" (click)="removeLine($index)">×</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
 
     <div class="actions">
       <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()">

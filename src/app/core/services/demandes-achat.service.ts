@@ -18,12 +18,10 @@ export class DemandesAchatService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/b2b/demandes-achat`;
 
-  /** Commercial : mes demandes. Admin peut aussi lister les siennes ici. */
   listMes(opts: { statut?: string; page?: number; pageSize?: number } = {}) {
     return this.listAt(`${this.base}/mes`, opts);
   }
 
-  /** Admin : toutes les demandes. */
   listAll(opts: { statut?: string; page?: number; pageSize?: number } = {}) {
     return this.listAt(this.base, opts);
   }
@@ -49,7 +47,6 @@ export class DemandesAchatService {
     );
   }
 
-  /** Admin : créer / rattacher un article Sage sur une ligne. */
   creerArticle(demandeId: number, ligneId: number, body: CreerArticleDemandeRequest) {
     return this.http
       .post<ApiResponse<unknown>>(`${this.base}/${demandeId}/lignes/${ligneId}/article`, body)
@@ -59,7 +56,6 @@ export class DemandesAchatService {
       );
   }
 
-  /** Admin : générer le BC fournisseur Sage (dépôt obligatoire). */
   genererSage(demandeId: number, body: GenererSageDemandeRequest) {
     return this.http.post<ApiResponse<unknown>>(`${this.base}/${demandeId}/generer-sage`, body).pipe(
       map((res) => this.unwrap(res)),
@@ -93,7 +89,7 @@ export class DemandesAchatService {
     if (body?.errors?.length) return body.errors.join(' · ');
     if (body?.message) return body.message;
     if (body?.detail) return body.detail;
-    return http?.message || 'Erreur API demandes d\'achat';
+    return http?.message || "Erreur API demandes d'achat";
   }
 
   private normalizeList(raw: unknown): DemandeAchatListResult {
@@ -143,13 +139,19 @@ export class DemandesAchatService {
   }
 
   private normalizeLigne(row: Record<string, unknown>): DemandeAchatLigne {
+    const articleSage = (row['articleSage'] ?? row['ArticleSage'] ?? row['articleReference'] ?? row['ArticleReference']) as
+      | string
+      | null;
     return {
       id: Number(row['id'] ?? row['Id'] ?? 0),
       demandeId: Number(row['demandeId'] ?? row['DemandeId'] ?? 0),
       refFournisseur: String(row['refFournisseur'] ?? row['RefFournisseur'] ?? ''),
+      designation: (row['designation'] ?? row['Designation']) as string | null,
       quantite: Number(row['quantite'] ?? row['Quantite'] ?? 0),
-      articleSage: (row['articleSage'] ?? row['ArticleSage']) as string | null,
+      articleSage: articleSage,
+      articleReference: articleSage,
       qteRecue: (row['qteRecue'] ?? row['QteRecue']) as number | null,
+      estNouvelArticle: Boolean(row['estNouvelArticle'] ?? row['EstNouvelArticle'] ?? !articleSage),
     };
   }
 }

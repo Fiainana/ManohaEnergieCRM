@@ -35,10 +35,14 @@ export interface DemandeAchatEntete {
 export interface DemandeAchatLigne {
   id: number;
   demandeId: number;
+  /** Libellé stocké (désignation ou réf.). */
   refFournisseur: string;
+  designation?: string | null;
   quantite: number;
   articleSage?: string | null;
+  articleReference?: string | null;
   qteRecue?: number | null;
+  estNouvelArticle?: boolean;
 }
 
 export interface DemandeAchatDetail {
@@ -55,7 +59,10 @@ export interface DemandeAchatListResult {
 }
 
 export interface CreateDemandeAchatLigne {
-  refFournisseur: string;
+  /** Article Sage existant (AR_Ref). */
+  articleReference?: string | null;
+  /** Désignation seule si article inexistant. */
+  designation?: string | null;
   quantite: number;
 }
 
