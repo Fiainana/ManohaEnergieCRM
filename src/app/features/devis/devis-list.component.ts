@@ -27,6 +27,7 @@ export class DevisListComponent implements OnInit {
   readonly page = signal(1);
   readonly totalPages = signal(0);
   readonly pageSize = 25;
+  readonly pdfPiece = signal<string | null>(null);
   search = '';
 
   constructor() {
@@ -64,5 +65,20 @@ export class DevisListComponent implements OnInit {
           this.error.set(err?.message || 'Erreur chargement devis');
         },
       });
+  }
+
+  exportPdf(ev: Event, piece: string): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!piece || this.pdfPiece()) return;
+    this.pdfPiece.set(piece);
+    this.error.set(null);
+    this.api.downloadPdf(piece).subscribe({
+      next: () => this.pdfPiece.set(null),
+      error: (err) => {
+        this.pdfPiece.set(null);
+        this.error.set(err?.message || 'Export PDF impossible');
+      },
+    });
   }
 }

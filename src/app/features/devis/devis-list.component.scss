@@ -62,6 +62,32 @@
   .strong {
     font-weight: 650;
   }
+
+  .act {
+    width: 64px;
+    text-align: center;
+  }
+}
+
+.pdf-btn {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.25rem 0.45rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--color-primary);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #fff5f5;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: wait;
+  }
 }
 
 .pad {

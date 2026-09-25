@@ -29,6 +29,7 @@
             <th>Date</th>
             <th>Référence</th>
             <th class="num">Total TTC</th>
+            <th class="act">PDF</th>
           </tr>
         </thead>
         <tbody>
@@ -39,6 +40,17 @@
               <td>{{ d.dateDocument ? (d.dateDocument | date: 'dd/MM/yyyy') : '—' }}</td>
               <td>{{ d.reference || '—' }}</td>
               <td class="num">{{ d.totalTTC != null ? (d.totalTTC | number: '1.0-0') + ' Ar' : '—' }}</td>
+              <td class="act" (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  class="pdf-btn"
+                  title="Exporter PDF"
+                  (click)="exportPdf($event, d.numeroPiece)"
+                  [disabled]="pdfPiece() === d.numeroPiece"
+                >
+                  {{ pdfPiece() === d.numeroPiece ? '…' : 'PDF' }}
+                </button>
+              </td>
             </tr>
           }
         </tbody>
