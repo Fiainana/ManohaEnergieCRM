@@ -138,6 +138,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 100dvh;
 }
 
 .topbar {
@@ -147,6 +148,7 @@
   padding: 0 1.5rem;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 
   &__title {
     margin: 0;
@@ -157,7 +159,10 @@
 
 .content {
   flex: 1;
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1.25rem 1.5rem 1.5rem;
 }
 
 @media (max-width: 768px) {
