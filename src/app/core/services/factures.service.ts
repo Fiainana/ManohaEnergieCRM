@@ -43,8 +43,7 @@ export class FacturesService {
         catchError((err: HttpErrorResponse) => {
           const msg =
             err.status === 403
-              ? err.error?.message ||
-                'Impression déjà effectuée. Seul un administrateur peut réimprimer.'
+              ? 'Impression déjà effectuée. Seul un administrateur peut réimprimer.'
               : err.status === 404
                 ? 'Facture introuvable.'
                 : 'Impossible de générer le PDF.';
@@ -64,8 +63,8 @@ export class FacturesService {
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
   }
 
-  private normalize(raw: FactureDetail & Record<string, unknown>): FactureDetail {
-    const anyRaw = raw as Record<string, unknown>;
+  private normalize(raw: FactureDetail): FactureDetail {
+    const anyRaw = raw as unknown as Record<string, unknown>;
     return {
       numeroPiece: String(raw.numeroPiece || anyRaw['NumeroPiece'] || ''),
       dateDocument: (raw.dateDocument || anyRaw['DateDocument']) as string | null,
