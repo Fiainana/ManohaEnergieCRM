@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { catchError, map, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response';
 import {
@@ -35,7 +35,8 @@ export class ClientsService {
             throw new Error(res.message || 'Impossible de charger les clients');
           }
           return this.normalizeList(res.data as unknown as Record<string, unknown>);
-        })
+        }),
+        catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les clients')))
       );
   }
 
@@ -48,7 +49,8 @@ export class ClientsService {
             throw new Error(res.message || 'Client introuvable');
           }
           return res.data;
-        })
+        }),
+        catchError((err) => throwError(() => this.toError(err, 'Client introuvable')))
       );
   }
 
@@ -69,7 +71,8 @@ export class ClientsService {
             throw new Error(res.message || 'Impossible de charger les factures');
           }
           return res.data;
-        })
+        }),
+        catchError((err) => throwError(() => this.toError(err, 'Impossible de charger les factures')))
       );
   }
 
@@ -77,10 +80,11 @@ export class ClientsService {
     return this.http.post<ApiResponse<unknown>>(this.base, body).pipe(
       map((res) => {
         if (!res.success || !res.data) {
-          throw new Error(res.message || 'Création impossible');
+          throw new Error(res.message || res.detail || 'Création impossible');
         }
         return this.normalizeClient(res.data as Record<string, unknown>);
-      })
+      }),
+      catchError((err) => throwError(() => this.toError(err, 'Création du client impossible')))
     );
   }
 
@@ -90,11 +94,31 @@ export class ClientsService {
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {
-            throw new Error(res.message || 'Mise à jour impossible');
+            throw new Error(res.message || res.detail || 'Mise à jour impossible');
           }
           return this.normalizeClient(res.data as Record<string, unknown>);
-        })
+        }),
+        catchError((err) => throwError(() => this.toError(err, 'Mise à jour impossible')))
       );
+  }
+
+  /** Extrait message + detail du corps ApiResponse en cas d'HttpErrorResponse. */
+  private toError(err: unknown, fallback: string): Error {
+    if (err instanceof Error && !(err as HttpErrorResponse).status) {
+      return err;
+    }
+    const http = err as HttpErrorResponse;
+    const body = http?.error as ApiResponse | string | null | undefined;
+    if (body && typeof body === 'object') {
+      const msg =
+        body.message ||
+        body.detail ||
+        (Array.isArray(body.errors) && body.errors.length ? body.errors.join(' · ') : null);
+      if (msg) return new Error(msg);
+    }
+    if (typeof body === 'string' && body.trim()) return new Error(body.trim());
+    if (http?.message) return new Error(http.message);
+    return new Error(fallback);
   }
 
   private normalizeList(raw: Record<string, unknown>): ClientListResult {
