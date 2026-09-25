@@ -3,7 +3,6 @@
   [class.shell--collapsed]="collapsed() && isDesktop()"
   [class.shell--mobile-open]="mobileOpen()"
 >
-  <!-- Overlay mobile -->
   @if (mobileOpen() && !isDesktop()) {
     <div class="shell__scrim" (click)="closeMobile()" aria-hidden="true"></div>
   }
@@ -56,6 +55,12 @@
           <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5z" />
         </svg>
         <span class="sidebar__label">Devis</span>
+      </a>
+      <a routerLink="/factures" routerLinkActive="is-active" class="sidebar__link" [title]="collapsed() && isDesktop() ? 'Factures' : ''">
+        <svg class="sidebar__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-5 14H7v-2h7zm3-4H7v-2h10zm0-4H7V7h10z" />
+        </svg>
+        <span class="sidebar__label">Factures</span>
       </a>
       <a routerLink="/articles" routerLinkActive="is-active" class="sidebar__link" [title]="collapsed() && isDesktop() ? 'Articles' : ''">
         <svg class="sidebar__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -150,7 +155,6 @@
     </main>
   </div>
 
-  <!-- Bottom nav mobile (modules prioritaires) -->
   <nav class="bottom-nav" aria-label="Navigation rapide">
     <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }" class="bottom-nav__item">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z" /></svg>
@@ -164,9 +168,9 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5z" /></svg>
       <span>Devis</span>
     </a>
-    <a routerLink="/demandes-achat" routerLinkActive="is-active" class="bottom-nav__item">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2M1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2" /></svg>
-      <span>Achats</span>
+    <a routerLink="/factures" routerLinkActive="is-active" class="bottom-nav__item">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-5 14H7v-2h7zm3-4H7v-2h10zm0-4H7V7h10z" /></svg>
+      <span>Factures</span>
     </a>
   </nav>
 </div>
