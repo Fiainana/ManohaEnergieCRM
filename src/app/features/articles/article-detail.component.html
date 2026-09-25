@@ -28,24 +28,11 @@
         </strong>
       </div>
       <div>
-        <span>Prix d’achat</span>
-        <strong>
-          @if (a.prixAchat != null) {
-            {{ a.prixAchat | number: '1.0-0' }} Ar
-          } @else {
-            —
-          }
-        </strong>
-      </div>
-      <div>
-        <span>Stock total</span>
-        <strong>
-          {{ stockTotal() | number: '1.0-2' }}
-          {{ a.uniteVenteLibelle || '' }}
-        </strong>
+        <span>Unité de vente</span>
+        <strong>{{ a.uniteVenteLibelle || '—' }}</strong>
       </div>
       <div [class.is-low]="stockDisponible() <= 0">
-        <span>Disponible</span>
+        <span>Stock disponible</span>
         <strong>
           {{ stockDisponible() | number: '1.0-2' }}
           {{ a.uniteVenteLibelle || '' }}
@@ -53,53 +40,12 @@
       </div>
     </section>
 
-    <div class="grid">
-      <section class="card">
-        <h2>Fiche</h2>
-        <dl class="dl">
-          <div><dt>Famille</dt><dd>{{ a.codeFamille || '—' }}</dd></div>
-          <div><dt>Unité de vente</dt><dd>{{ a.uniteVenteLibelle || a.uniteVenteNo || '—' }}</dd></div>
-          <div><dt>Réservé</dt><dd>{{ stockReserve() | number: '1.0-2' }} {{ a.uniteVenteLibelle || '' }}</dd></div>
-          <div><dt>Commandé</dt><dd>{{ stockCommande() | number: '1.0-2' }} {{ a.uniteVenteLibelle || '' }}</dd></div>
-        </dl>
-      </section>
-
-      <section class="card">
-        <h2>Stock par dépôt</h2>
-        @if (stocks().length === 0) {
-          <p class="text-muted">Aucun stock dépôt.</p>
-        } @else {
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Dépôt</th>
-                <th>Stock</th>
-                <th>Rés.</th>
-                <th>Cde</th>
-                <th>Dispo</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (s of stocks(); track s.depotNo) {
-                <tr>
-                  <td>
-                    {{ s.depotIntitule || s.depotNo }}
-                    @if (s.principal) {
-                      <small class="text-muted"> principal</small>
-                    }
-                  </td>
-                  <td class="num">{{ s.stock | number: '1.0-2' }}</td>
-                  <td class="num">{{ s.reserve | number: '1.0-2' }}</td>
-                  <td class="num">{{ s.commande | number: '1.0-2' }}</td>
-                  <td class="num" [class.text-danger]="(s.disponible ?? 0) <= 0">
-                    {{ s.disponible | number: '1.0-2' }}
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-      </section>
-    </div>
+    <section class="card">
+      <h2>Fiche</h2>
+      <dl class="dl">
+        <div><dt>Référence</dt><dd>{{ a.reference }}</dd></div>
+        <div><dt>Famille</dt><dd>{{ a.codeFamille || '—' }}</dd></div>
+      </dl>
+    </section>
   }
 </div>

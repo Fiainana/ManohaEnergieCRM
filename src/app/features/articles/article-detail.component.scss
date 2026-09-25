@@ -1,5 +1,6 @@
 .page {
   width: 100%;
+  max-width: 720px;
 }
 
 .back-link {
@@ -32,12 +33,12 @@
 
 .totals {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
 
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr 1fr;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
   }
 
   div {
@@ -66,16 +67,6 @@
   }
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 1rem;
-
-  @media (max-width: 800px) {
-    grid-template-columns: 1fr;
-  }
-}
-
 .card h2 {
   margin: 0 0 0.85rem;
   font-size: 0.95rem;
@@ -99,29 +90,6 @@
   dd {
     margin: 0;
     font-weight: 550;
-  }
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-
-  th,
-  td {
-    padding: 0.5rem 0.55rem;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  th {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-
-  .num {
-    font-variant-numeric: tabular-nums;
   }
 }
 
