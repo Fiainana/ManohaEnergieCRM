@@ -46,24 +46,36 @@
               </div>
               <div class="quick-create__grid">
                 <label class="qc-field qc-field--full">
-                  <span>Intitulé <em>*</em></span>
-                  <input [(ngModel)]="newClient.intitule" maxlength="69" placeholder="Raison sociale" />
+                  <span>Intitulé / Raison sociale <em>*</em></span>
+                  <input [(ngModel)]="newClient.intitule" maxlength="69" placeholder="Nom du client" />
                 </label>
                 <label class="qc-field">
                   <span>Téléphone</span>
-                  <input [(ngModel)]="newClient.telephone" maxlength="21" />
+                  <input [(ngModel)]="newClient.telephone" maxlength="21" placeholder="03X XX XXX XX" />
                 </label>
                 <label class="qc-field">
                   <span>Email</span>
                   <input type="email" [(ngModel)]="newClient.email" maxlength="69" />
+                </label>
+                <label class="qc-field qc-field--full">
+                  <span>Adresse</span>
+                  <input [(ngModel)]="newClient.adresse" maxlength="35" />
+                </label>
+                <label class="qc-field">
+                  <span>Complément</span>
+                  <input [(ngModel)]="newClient.complement" maxlength="35" />
+                </label>
+                <label class="qc-field">
+                  <span>Code postal</span>
+                  <input [(ngModel)]="newClient.codePostal" maxlength="9" />
                 </label>
                 <label class="qc-field">
                   <span>Ville</span>
                   <input [(ngModel)]="newClient.ville" maxlength="35" />
                 </label>
                 <label class="qc-field">
-                  <span>Adresse</span>
-                  <input [(ngModel)]="newClient.adresse" maxlength="35" />
+                  <span>Pays</span>
+                  <input [(ngModel)]="newClient.pays" maxlength="35" />
                 </label>
               </div>
               @if (createClientError()) {

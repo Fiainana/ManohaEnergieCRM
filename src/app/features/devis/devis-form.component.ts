@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevisService } from '../../core/services/devis.service';
 import { ClientsService } from '../../core/services/clients.service';
 import { ArticlesService } from '../../core/services/articles.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Client } from '../../core/models/client.model';
 import { Article } from '../../core/models/article.model';
 import { DevisLignePayload } from '../../core/models/devis.model';
@@ -18,7 +19,6 @@ interface LineDraft {
   prixUnitaire: number | null;
   remise: number | null;
   montantTTC: number | null;
-  /** Stock disponible au moment du choix (info UI uniquement). */
   stockDisponible?: number | null;
 }
 
@@ -35,7 +35,7 @@ export class DevisFormComponent implements OnInit {
   private readonly devisApi = inject(DevisService);
   private readonly clientsApi = inject(ClientsService);
   private readonly articlesApi = inject(ArticlesService);
-  /** Affichage TTC estimé tant que Sage n'a pas renvoyé le montant. */
+  private readonly auth = inject(AuthService);
   private readonly tva = 0.2;
 
   private readonly clientSearch$ = new Subject<string>();
@@ -58,7 +58,6 @@ export class DevisFormComponent implements OnInit {
   articleQuery = '';
   readonly clientHits = signal<Client[]>([]);
   readonly articleHits = signal<Article[]>([]);
-  /** Affiche le panneau de création rapide client (style Odoo). */
   readonly showCreateClient = signal(false);
   readonly creatingClient = signal(false);
   readonly createClientError = signal<string | null>(null);
@@ -67,8 +66,11 @@ export class DevisFormComponent implements OnInit {
     intitule: '',
     telephone: '',
     email: '',
-    ville: '',
     adresse: '',
+    complement: '',
+    codePostal: '',
+    ville: '',
+    pays: 'Madagascar',
   };
 
   constructor() {
@@ -138,14 +140,16 @@ export class DevisFormComponent implements OnInit {
     this.showCreateClient.set(false);
   }
 
-  /** Ouvre le panneau de création rapide, prérempli avec la recherche. */
   openCreateClient(): void {
     this.newClient = {
       intitule: this.clientQuery.trim(),
       telephone: '',
       email: '',
-      ville: '',
       adresse: '',
+      complement: '',
+      codePostal: '',
+      ville: '',
+      pays: 'Madagascar',
     };
     this.createClientError.set(null);
     this.showCreateClient.set(true);
@@ -160,19 +164,25 @@ export class DevisFormComponent implements OnInit {
   createClientQuick(): void {
     const intitule = this.newClient.intitule.trim();
     if (!intitule) {
-      this.createClientError.set('L\'intitulé est obligatoire.');
+      this.createClientError.set("L'intitulé est obligatoire.");
       return;
     }
     this.creatingClient.set(true);
     this.createClientError.set(null);
+
+    const sageMatricule = this.auth.user()?.sageMatricule?.trim() || null;
 
     this.clientsApi
       .create({
         intitule,
         telephone: this.newClient.telephone.trim() || null,
         email: this.newClient.email.trim() || null,
-        ville: this.newClient.ville.trim() || null,
         adresse: this.newClient.adresse.trim() || null,
+        complement: this.newClient.complement.trim() || null,
+        codePostal: this.newClient.codePostal.trim() || null,
+        ville: this.newClient.ville.trim() || null,
+        pays: this.newClient.pays.trim() || null,
+        representantCode: sageMatricule,
       })
       .subscribe({
         next: (created) => {
