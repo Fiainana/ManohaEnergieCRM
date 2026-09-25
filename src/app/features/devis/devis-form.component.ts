@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevisService } from '../../core/services/devis.service';
@@ -29,24 +30,31 @@ interface LineDraft {
   templateUrl: './devis-form.component.html',
   styleUrl: './devis-form.component.scss',
 })
-export class DevisFormComponent implements OnInit {
+export class DevisFormComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly devisApi = inject(DevisService);
   private readonly clientsApi = inject(ClientsService);
   private readonly articlesApi = inject(ArticlesService);
   private readonly auth = inject(AuthService);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly tva = 0.2;
 
   private readonly clientSearch$ = new Subject<string>();
   private readonly articleSearch$ = new Subject<string>();
+  private pdfObjectUrl: string | null = null;
 
   readonly isNew = signal(true);
   readonly piece = signal<string | null>(null);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly pdfBusy = signal(false);
   readonly error = signal<string | null>(null);
   readonly savedTotalTtc = signal<number | null>(null);
+
+  /** Aperçu PDF (modal). */
+  readonly showPdf = signal(false);
+  readonly pdfUrl = signal<SafeResourceUrl | null>(null);
 
   clientNumero = '';
   clientLabel = '';
@@ -94,6 +102,10 @@ export class DevisFormComponent implements OnInit {
     this.load(piece);
   }
 
+  ngOnDestroy(): void {
+    this.revokePdfUrl();
+  }
+
   load(piece: string): void {
     this.loading.set(true);
     this.devisApi.get(piece).subscribe({
@@ -120,6 +132,48 @@ export class DevisFormComponent implements OnInit {
         this.error.set(err?.message || 'Devis introuvable');
       },
     });
+  }
+
+  /** Aperçu PDF dans une modal (iframe). */
+  viewPdf(): void {
+    const piece = this.piece();
+    if (!piece) return;
+    this.pdfBusy.set(true);
+    this.error.set(null);
+    this.devisApi.getPdf(piece).subscribe({
+      next: ({ blob }) => {
+        this.revokePdfUrl();
+        this.pdfObjectUrl = URL.createObjectURL(blob);
+        this.pdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfObjectUrl));
+        this.showPdf.set(true);
+        this.pdfBusy.set(false);
+      },
+      error: (err) => {
+        this.pdfBusy.set(false);
+        this.error.set(err?.message || 'Impossible de générer le PDF');
+      },
+    });
+  }
+
+  /** Téléchargement fichier PDF. */
+  exportPdf(): void {
+    const piece = this.piece();
+    if (!piece) return;
+    this.pdfBusy.set(true);
+    this.error.set(null);
+    this.devisApi.downloadPdf(piece).subscribe({
+      next: () => this.pdfBusy.set(false),
+      error: (err) => {
+        this.pdfBusy.set(false);
+        this.error.set(err?.message || 'Téléchargement PDF impossible');
+      },
+    });
+  }
+
+  closePdf(): void {
+    this.showPdf.set(false);
+    this.revokePdfUrl();
+    this.pdfUrl.set(null);
   }
 
   onClientType(): void {
@@ -344,6 +398,13 @@ export class DevisFormComponent implements OnInit {
       next: () => void this.router.navigate(['/devis']),
       error: (err) => this.error.set(err?.message || 'Annulation impossible'),
     });
+  }
+
+  private revokePdfUrl(): void {
+    if (this.pdfObjectUrl) {
+      URL.revokeObjectURL(this.pdfObjectUrl);
+      this.pdfObjectUrl = null;
+    }
   }
 
   private searchClients(q: string): void {

@@ -14,6 +14,24 @@
       {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
     </button>
     @if (!isNew()) {
+      <button
+        type="button"
+        class="btn btn--ghost"
+        (click)="viewPdf()"
+        [disabled]="pdfBusy() || saving()"
+        title="Aperçu du modèle PDF"
+      >
+        {{ pdfBusy() ? 'PDF…' : 'Voir PDF' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn--ghost"
+        (click)="exportPdf()"
+        [disabled]="pdfBusy() || saving()"
+        title="Télécharger le PDF"
+      >
+        Exporter PDF
+      </button>
       <button type="button" class="btn btn--ghost" (click)="facturer()" [disabled]="saving()">Facturer</button>
       <button type="button" class="btn btn--ghost" (click)="cancel()">Annuler le devis</button>
     }
@@ -222,5 +240,23 @@
         <div><span>Total TTC</span><strong>{{ totalTtc() | number: '1.0-0' }} Ar</strong></div>
       </aside>
     </section>
+  }
+
+  @if (showPdf() && pdfUrl()) {
+    <div class="pdf-modal" role="dialog" aria-modal="true" aria-label="Aperçu PDF devis">
+      <div class="pdf-modal__backdrop" (click)="closePdf()"></div>
+      <div class="pdf-modal__panel">
+        <header class="pdf-modal__bar">
+          <strong>Modèle PDF — {{ piece() }}</strong>
+          <div class="pdf-modal__actions">
+            <button type="button" class="btn btn--ghost btn--sm" (click)="exportPdf()" [disabled]="pdfBusy()">
+              Télécharger
+            </button>
+            <button type="button" class="btn btn--ghost btn--sm" (click)="closePdf()">Fermer</button>
+          </div>
+        </header>
+        <iframe class="pdf-modal__frame" [src]="pdfUrl()" title="Aperçu PDF devis"></iframe>
+      </div>
+    </div>
   }
 </div>

@@ -43,6 +43,49 @@ export class DevisService {
       );
   }
 
+  /** PDF binaire (JWT via interceptor). */
+  getPdf(numeroPiece: string) {
+    return this.http
+      .get(`${this.base}/${encodeURIComponent(numeroPiece)}/pdf`, {
+        responseType: 'blob',
+        observe: 'response',
+      })
+      .pipe(
+        map((resp) => {
+          const blob = resp.body;
+          if (!blob || blob.size === 0) {
+            throw new Error('PDF vide ou indisponible');
+          }
+          // Si l'API renvoie du JSON d'erreur avec content-type pdf mal configuré
+          if (blob.type && blob.type.includes('json')) {
+            throw new Error('Erreur lors de la génération du PDF');
+          }
+          const cd = resp.headers.get('content-disposition') || '';
+          const match = /filename\*?=(?:UTF-8''|"?)([^";]+)/i.exec(cd);
+          const fileName = match
+            ? decodeURIComponent(match[1].replace(/"/g, ''))
+            : `Devis_${numeroPiece}.pdf`;
+          return { blob, fileName };
+        }),
+        catchError((err) => throwError(() => new Error(this.readBlobError(err))))
+      );
+  }
+
+  /** Télécharge le PDF (fichier local). */
+  downloadPdf(numeroPiece: string) {
+    return this.getPdf(numeroPiece).pipe(
+      map(({ blob, fileName }) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        return fileName;
+      })
+    );
+  }
+
   create(body: CreateDevisRequest) {
     return this.http.post<ApiResponse<Record<string, unknown>>>(this.base, body).pipe(
       map((res) => this.pickPiece(this.unwrap(res) as Record<string, unknown>)),
@@ -88,6 +131,18 @@ export class DevisService {
     if (body?.message) return body.message;
     if (body?.detail) return body.detail;
     return http?.message || 'Erreur API devis';
+  }
+
+  private readBlobError(err: unknown): string {
+    const http = err as HttpErrorResponse;
+    if (http?.error instanceof Blob) {
+      // message async non dispo ici ; statut générique
+      if (http.status === 404) return 'Devis introuvable pour le PDF';
+      if (http.status === 403) return 'Accès PDF refusé';
+      if (http.status === 503) return 'Service Sage indisponible';
+      return `Erreur PDF (${http.status})`;
+    }
+    return this.readError(err);
   }
 
   private pickRows(raw: unknown): Record<string, unknown>[] {
