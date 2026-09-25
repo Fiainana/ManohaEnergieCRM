@@ -25,11 +25,8 @@ export class DevisService {
     if (opts.pageSize) params = params.set('pageSize', opts.pageSize);
     if (opts.mes != null) params = params.set('mes', opts.mes);
 
-    return this.http.get<ApiResponse<Record<string, unknown>>>(this.base, { params }).pipe(
-      map((res) => {
-        if (!res.success || !res.data) throw new Error(res.message || 'Impossible de charger les devis');
-        return this.normalizeList(res.data);
-      }),
+    return this.http.get<ApiResponse<unknown> | unknown>(this.base, { params }).pipe(
+      map((res) => this.normalizeList(this.unwrap(res))),
       catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
@@ -39,8 +36,8 @@ export class DevisService {
       .get<ApiResponse<Record<string, unknown>>>(`${this.base}/${encodeURIComponent(numeroPiece)}`)
       .pipe(
         map((res) => {
-          if (!res.success || !res.data) throw new Error(res.message || 'Devis introuvable');
-          return this.normalizeDetail(res.data);
+          const data = this.unwrap(res) as Record<string, unknown>;
+          return this.normalizeDetail(data);
         }),
         catchError((err) => throwError(() => new Error(this.readError(err))))
       );
@@ -48,10 +45,7 @@ export class DevisService {
 
   create(body: CreateDevisRequest) {
     return this.http.post<ApiResponse<Record<string, unknown>>>(this.base, body).pipe(
-      map((res) => {
-        if (!res.success) throw new Error(res.message || 'Création devis impossible');
-        return this.pickPiece(res.data);
-      }),
+      map((res) => this.pickPiece(this.unwrap(res) as Record<string, unknown>)),
       catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
@@ -60,31 +54,31 @@ export class DevisService {
     return this.http
       .put<ApiResponse<Record<string, unknown>>>(`${this.base}/${encodeURIComponent(numeroPiece)}`, body)
       .pipe(
-        map((res) => {
-          if (!res.success) throw new Error(res.message || 'Mise à jour devis impossible');
-          return this.pickPiece(res.data) || numeroPiece;
-        }),
+        map((res) => this.pickPiece(this.unwrap(res) as Record<string, unknown>) || numeroPiece),
         catchError((err) => throwError(() => new Error(this.readError(err))))
       );
   }
 
   cancel(numeroPiece: string) {
     return this.http.delete<ApiResponse<unknown>>(`${this.base}/${encodeURIComponent(numeroPiece)}`).pipe(
-      map((res) => {
-        if (!res.success) throw new Error(res.message || 'Annulation impossible');
-      }),
+      map(() => undefined),
       catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
 
   facturer(numeroPiece: string) {
     return this.http.post<ApiResponse<Record<string, unknown>>>(`${this.base}/facturer`, { numeroPiece }).pipe(
-      map((res) => {
-        if (!res.success) throw new Error(res.message || 'Facturation impossible');
-        return res.data;
-      }),
+      map((res) => this.unwrap(res)),
       catchError((err) => throwError(() => new Error(this.readError(err))))
     );
+  }
+
+  private unwrap(res: unknown): unknown {
+    if (!res || typeof res !== 'object') return res;
+    const o = res as Record<string, unknown>;
+    if ('data' in o && o['data'] != null) return o['data'];
+    if ('Data' in o && o['Data'] != null) return o['Data'];
+    return res;
   }
 
   private readError(err: unknown): string {
@@ -93,18 +87,30 @@ export class DevisService {
     if (body?.errors?.length) return body.errors.join(' · ');
     if (body?.message) return body.message;
     if (body?.detail) return body.detail;
-    if (typeof http?.error === 'string' && http.error.trim()) return http.error;
     return http?.message || 'Erreur API devis';
   }
 
-  private normalizeList(raw: Record<string, unknown>): DevisListResult {
-    const items = (raw['items'] || raw['Items'] || []) as Record<string, unknown>[];
+  private pickRows(raw: unknown): Record<string, unknown>[] {
+    if (Array.isArray(raw)) return raw as Record<string, unknown>[];
+    if (!raw || typeof raw !== 'object') return [];
+    const o = raw as Record<string, unknown>;
+    const keys = ['items', 'Items', 'devis', 'Devis', 'result', 'Result'];
+    for (const k of keys) {
+      if (Array.isArray(o[k])) return o[k] as Record<string, unknown>[];
+    }
+    if (o['data'] && typeof o['data'] === 'object') return this.pickRows(o['data']);
+    return [];
+  }
+
+  private normalizeList(raw: unknown): DevisListResult {
+    const bag = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+    const items = this.pickRows(raw).map((row) => this.normalizeEntete(row));
     return {
-      page: Number(raw['page'] ?? raw['Page'] ?? 1),
-      pageSize: Number(raw['pageSize'] ?? raw['PageSize'] ?? 25),
-      total: Number(raw['total'] ?? raw['Total'] ?? 0),
-      totalPages: Number(raw['totalPages'] ?? raw['TotalPages'] ?? 0),
-      items: items.map((row) => this.normalizeEntete(row)),
+      page: Number(bag['page'] ?? bag['Page'] ?? 1),
+      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? items.length || 25),
+      total: Number(bag['total'] ?? bag['Total'] ?? items.length),
+      totalPages: Number(bag['totalPages'] ?? bag['TotalPages'] ?? (items.length ? 1 : 0)),
+      items,
     };
   }
 
