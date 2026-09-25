@@ -1,6 +1,6 @@
 /* ============================================================
-   Manoha Énergie CRM — Design system entreprise
-   Inspiration : Oracle Fusion Cloud, SAP Fiori, Microsoft Fluent
+   Manoha Énergie CRM — Design system entreprise responsive
+   Inspiration : Oracle Fusion Cloud, SAP Fiori
    ============================================================ */
 
 *,
@@ -10,7 +10,6 @@
 }
 
 :root {
-  /* Brand */
   --color-primary: #c41e3a;
   --color-primary-hover: #a01830;
   --color-primary-active: #8b1529;
@@ -18,7 +17,6 @@
   --color-primary-muted: rgba(196, 30, 58, 0.14);
   --color-accent: #8b1529;
 
-  /* Neutrals (slate — densité ERP) */
   --color-bg: #f1f5f9;
   --color-surface: #ffffff;
   --color-surface-2: #f8fafc;
@@ -29,7 +27,6 @@
   --color-text-muted: #64748b;
   --color-text-inverse: #f8fafc;
 
-  /* Semantic */
   --color-danger: #dc2626;
   --color-danger-soft: #fef2f2;
   --color-success: #059669;
@@ -39,14 +36,11 @@
   --color-info: #2563eb;
   --color-info-soft: #eff6ff;
 
-  /* Shell */
   --sidebar-width: 248px;
   --sidebar-width-collapsed: 64px;
   --header-height: 52px;
   --sidebar-bg: #0b1220;
-  --sidebar-bg-elevated: #111827;
 
-  /* Shape & elevation */
   --radius-sm: 4px;
   --radius: 6px;
   --radius-lg: 10px;
@@ -57,7 +51,6 @@
   --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
   --focus-ring: 0 0 0 3px rgba(196, 30, 58, 0.22);
 
-  /* Type */
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', Consolas, monospace;
   --fs-xs: 0.6875rem;
@@ -69,9 +62,11 @@
   --fs-2xl: 1.375rem;
   --lh: 1.45;
 
-  /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --duration: 0.18s;
+
+  --page-max: 1280px;
+  --content-gutter: 1.15rem;
 }
 
 html,
@@ -88,7 +83,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* —— Typography —— */
+/* Bloque le scroll quand le drawer mobile est ouvert */
+body.shell-nav-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 h1,
 h2,
 h3,
@@ -130,6 +130,12 @@ textarea {
   font-family: inherit;
   font-size: inherit;
   color: var(--color-text);
+  max-width: 100%;
+}
+
+img,
+svg {
+  max-width: 100%;
 }
 
 /* —— Buttons —— */
@@ -222,7 +228,6 @@ textarea {
   }
 }
 
-/* —— Surfaces —— */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -231,11 +236,13 @@ textarea {
   padding: 1.15rem 1.25rem;
 }
 
-/* —— Page chrome (listes / formulaires) —— */
+/* —— Pages —— */
 .page,
 .odo,
 .odo-form {
-  max-width: 1280px;
+  width: 100%;
+  max-width: var(--page-max);
+  min-width: 0;
 }
 
 .page__header,
@@ -243,14 +250,15 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 1rem;
-  margin-bottom: 1.15rem;
-  padding-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--color-border);
 
   h1 {
     margin: 0.1rem 0 0;
-    font-size: var(--fs-2xl);
+    font-size: clamp(1.15rem, 2.5vw, 1.375rem);
     font-weight: 700;
   }
 }
@@ -264,13 +272,12 @@ textarea {
   color: var(--color-primary);
 }
 
-.page__count,
-.odo__bar .text-muted {
+.page__count {
   margin: 0.25rem 0 0;
   font-size: var(--fs-sm);
 }
 
-/* —— Data tables (ERP density) —— */
+/* —— Sheets / tables —— */
 .odo-sheet,
 .list-card {
   background: var(--color-surface);
@@ -280,15 +287,23 @@ textarea {
   overflow: hidden;
 }
 
+/* Conteneur scroll horizontal pour tables larges */
+.table-scroll,
+.odo-sheet,
+.list-card {
+  -webkit-overflow-scrolling: touch;
+}
+
 .odo-table,
-.data-table {
+.data-table,
+.lines {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--fs-md);
 
   th,
   td {
-    padding: 0.55rem 0.85rem;
+    padding: 0.55rem 0.75rem;
     border-bottom: 1px solid var(--color-border);
     text-align: left;
     vertical-align: middle;
@@ -320,6 +335,7 @@ textarea {
   .num {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .strong {
@@ -329,6 +345,22 @@ textarea {
   .mono {
     font-family: var(--font-mono);
     font-size: var(--fs-sm);
+  }
+}
+
+/* Sur mobile : tables en scroll horizontal */
+@media (max-width: 759.98px) {
+  .odo-sheet,
+  .list-card,
+  .notebook,
+  .sheet {
+    overflow-x: auto;
+  }
+
+  .odo-table,
+  .data-table,
+  .lines {
+    min-width: 560px;
   }
 }
 
@@ -429,6 +461,7 @@ textarea {
   border-radius: var(--radius);
   background: var(--color-surface);
   padding: 0.45rem 0.65rem;
+  width: auto;
   transition:
     border-color var(--duration) var(--ease),
     box-shadow var(--duration) var(--ease),
@@ -456,7 +489,6 @@ textarea {
   }
 }
 
-/* —— Toolbar / filters —— */
 .filters,
 .odo__search {
   margin-bottom: 0.9rem;
@@ -468,13 +500,13 @@ textarea {
   max-width: 360px;
 }
 
-/* —— Pager —— */
 .pager,
 .list-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.6rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.6rem;
   padding: 0.55rem 0.9rem;
   background: var(--color-surface-2);
   border-top: 1px solid var(--color-border);
@@ -482,7 +514,6 @@ textarea {
   color: var(--color-text-muted);
 }
 
-/* —— Utilities —— */
 .text-muted {
   color: var(--color-text-muted);
 }
@@ -504,7 +535,26 @@ textarea {
   margin: 0;
 }
 
-/* —— Skeleton —— */
+/* Actions bar — wrap sur mobile */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Filtres responsive */
+.filters__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.filters__field--grow {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -522,7 +572,6 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
-/* —— Scrollbar (webkit) —— */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -536,5 +585,47 @@ textarea {
 
   &:hover {
     background: #94a3b8;
+  }
+}
+
+/* ========== RESPONSIVE GLOBAL ========== */
+@media (max-width: 759.98px) {
+  :root {
+    --fs-2xl: 1.2rem;
+  }
+
+  .card {
+    padding: 0.9rem 1rem;
+  }
+
+  .page__header,
+  .odo__bar {
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .odo__search input,
+  .filters input[type='search'] {
+    max-width: none;
+  }
+
+  .sheet__head {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pdf-modal__panel {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100dvh;
+    border-radius: 0 !important;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .btn {
+    min-height: 36px;
   }
 }
