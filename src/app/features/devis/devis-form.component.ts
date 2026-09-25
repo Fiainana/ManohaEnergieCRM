@@ -49,15 +49,22 @@ export class DevisFormComponent implements OnInit, OnDestroy {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly pdfBusy = signal(false);
+  readonly emailBusy = signal(false);
   readonly error = signal<string | null>(null);
+  readonly successMsg = signal<string | null>(null);
   readonly savedTotalTtc = signal<number | null>(null);
 
-  /** Aperçu PDF (modal). */
   readonly showPdf = signal(false);
   readonly pdfUrl = signal<SafeResourceUrl | null>(null);
 
+  readonly showEmail = signal(false);
+  emailTo = '';
+  emailCc = '';
+  emailMessage = '';
+
   clientNumero = '';
   clientLabel = '';
+  clientEmail = '';
   reference = '';
   date = new Date().toISOString().slice(0, 10);
   lines: LineDraft[] = [];
@@ -126,6 +133,7 @@ export class DevisFormComponent implements OnInit, OnDestroy {
         }));
         if (this.lines.length === 0) this.addLine();
         this.loading.set(false);
+        if (this.clientNumero) this.loadClientEmail(this.clientNumero);
       },
       error: (err) => {
         this.loading.set(false);
@@ -134,7 +142,17 @@ export class DevisFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Aperçu PDF dans une modal (iframe). */
+  private loadClientEmail(numero: string): void {
+    this.clientsApi.getByNumero(numero).subscribe({
+      next: (d) => {
+        this.clientEmail = d.client?.email?.trim() || '';
+      },
+      error: () => {
+        /* ignore */
+      },
+    });
+  }
+
   viewPdf(): void {
     const piece = this.piece();
     if (!piece) return;
@@ -155,7 +173,6 @@ export class DevisFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Téléchargement fichier PDF. */
   exportPdf(): void {
     const piece = this.piece();
     if (!piece) return;
@@ -168,6 +185,44 @@ export class DevisFormComponent implements OnInit, OnDestroy {
         this.error.set(err?.message || 'Téléchargement PDF impossible');
       },
     });
+  }
+
+  openEmail(): void {
+    this.emailTo = this.clientEmail || '';
+    this.emailCc = '';
+    this.emailMessage = '';
+    this.successMsg.set(null);
+    this.error.set(null);
+    this.showEmail.set(true);
+  }
+
+  closeEmail(): void {
+    this.showEmail.set(false);
+  }
+
+  sendEmail(): void {
+    const piece = this.piece();
+    if (!piece || this.emailBusy()) return;
+    this.emailBusy.set(true);
+    this.error.set(null);
+    this.successMsg.set(null);
+    this.devisApi
+      .envoyerEmail(piece, {
+        to: this.emailTo.trim() || null,
+        cc: this.emailCc.trim() || null,
+        message: this.emailMessage.trim() || null,
+      })
+      .subscribe({
+        next: () => {
+          this.emailBusy.set(false);
+          this.successMsg.set('Devis envoyé par email.');
+          this.showEmail.set(false);
+        },
+        error: (err) => {
+          this.emailBusy.set(false);
+          this.error.set(err?.message || "Envoi de l'email impossible");
+        },
+      });
   }
 
   closePdf(): void {
@@ -189,6 +244,7 @@ export class DevisFormComponent implements OnInit, OnDestroy {
   pickClient(c: Client): void {
     this.clientNumero = c.numero;
     this.clientLabel = c.intitule;
+    this.clientEmail = c.email?.trim() || '';
     this.clientQuery = '';
     this.clientHits.set([]);
     this.showCreateClient.set(false);
