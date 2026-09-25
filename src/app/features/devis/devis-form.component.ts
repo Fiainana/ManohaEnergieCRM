@@ -17,6 +17,7 @@ interface LineDraft {
   quantite: number;
   prixUnitaire: number | null;
   remise: number | null;
+  montantTTC: number | null;
 }
 
 @Component({
@@ -32,6 +33,8 @@ export class DevisFormComponent implements OnInit {
   private readonly devisApi = inject(DevisService);
   private readonly clientsApi = inject(ClientsService);
   private readonly articlesApi = inject(ArticlesService);
+  /** Affichage TTC estimé tant que Sage n'a pas renvoyé le montant. */
+  private readonly tva = 0.2;
 
   private readonly clientSearch$ = new Subject<string>();
   private readonly articleSearch$ = new Subject<string>();
@@ -41,6 +44,7 @@ export class DevisFormComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+  readonly savedTotalTtc = signal<number | null>(null);
 
   clientNumero = '';
   clientLabel = '';
@@ -82,12 +86,14 @@ export class DevisFormComponent implements OnInit {
         this.clientLabel = data.entete.clientIntitule || this.clientNumero;
         this.reference = data.entete.reference || '';
         this.date = data.entete.dateDocument ? String(data.entete.dateDocument).slice(0, 10) : this.date;
+        this.savedTotalTtc.set(data.entete.totalTTC ?? data.entete.netAPayer ?? null);
         this.lines = (data.lignes || []).map((l) => ({
           articleReference: l.articleReference,
           designation: l.designation || l.articleReference,
           quantite: l.quantite || 1,
           prixUnitaire: l.prixUnitaire ?? null,
           remise: l.remisePourcent ?? null,
+          montantTTC: l.montantTTC ?? null,
         }));
         if (this.lines.length === 0) this.addLine();
         this.loading.set(false);
@@ -122,6 +128,7 @@ export class DevisFormComponent implements OnInit {
       quantite: 1,
       prixUnitaire: a.prixVente ?? null,
       remise: null,
+      montantTTC: null,
     };
     if (empty) Object.assign(empty, line);
     else this.lines = [...this.lines, line];
@@ -132,7 +139,7 @@ export class DevisFormComponent implements OnInit {
   addLine(): void {
     this.lines = [
       ...this.lines,
-      { articleReference: '', designation: '', quantite: 1, prixUnitaire: null, remise: null },
+      { articleReference: '', designation: '', quantite: 1, prixUnitaire: null, remise: null, montantTTC: null },
     ];
   }
 
@@ -141,26 +148,36 @@ export class DevisFormComponent implements OnInit {
     if (this.lines.length === 0) this.addLine();
   }
 
-  lineHt(l: LineDraft): number {
+  lineTtc(l: LineDraft): number {
+    if (l.montantTTC != null && Number(l.quantite) && l.montantTTC > 0) {
+      return Number(l.montantTTC);
+    }
     const q = Number(l.quantite) || 0;
     const p = Number(l.prixUnitaire) || 0;
     const r = Number(l.remise) || 0;
-    return q * p * (1 - r / 100);
+    const ht = q * p * (1 - r / 100);
+    return ht * (1 + this.tva);
   }
 
-  totalHt(): number {
-    return this.lines.reduce((s, l) => s + this.lineHt(l), 0);
+  totalTtc(): number {
+    if (this.savedTotalTtc() != null && this.lines.every((l) => l.montantTTC != null || !l.articleReference)) {
+      return this.savedTotalTtc() as number;
+    }
+    return this.lines.reduce((s, l) => s + this.lineTtc(l), 0);
   }
 
   payloadLines(): DevisLignePayload[] {
     return this.lines
-      .filter((l) => l.articleReference.trim())
-      .map((l) => ({
-        articleReference: l.articleReference.trim(),
-        quantite: Number(l.quantite) || 1,
-        prixUnitaire: l.prixUnitaire,
-        remise: l.remise,
-      }));
+      .filter((l) => l.articleReference.trim() && Number(l.quantite) > 0)
+      .map((l) => {
+        const row: DevisLignePayload = {
+          articleReference: l.articleReference.trim(),
+          quantite: Number(l.quantite),
+        };
+        const remise = Number(l.remise);
+        if (remise > 0) row.remise = remise;
+        return row;
+      });
   }
 
   save(): void {
@@ -175,37 +192,45 @@ export class DevisFormComponent implements OnInit {
     }
     this.saving.set(true);
     this.error.set(null);
+
+    const body = {
+      clientNumero: this.clientNumero.trim(),
+      ...(this.reference.trim() ? { reference: this.reference.trim() } : {}),
+      ...(this.date ? { date: this.date } : {}),
+      lignes,
+    };
+
     if (this.isNew()) {
-      this.devisApi
-        .create({
-          clientNumero: this.clientNumero,
-          reference: this.reference || null,
-          date: this.date || null,
-          lignes,
-        })
-        .subscribe({
-          next: (piece) => {
-            this.saving.set(false);
-            void this.router.navigate(['/devis', piece || '']);
-          },
-          error: (err) => {
-            this.saving.set(false);
-            this.error.set(err?.message || 'Enregistrement impossible');
-          },
-        });
-    } else {
-      const piece = this.piece();
-      if (!piece) return;
-      this.devisApi.update(piece, { reference: this.reference || null, date: this.date || null, lignes }).subscribe({
-        next: () => {
+      this.devisApi.create(body).subscribe({
+        next: (piece) => {
           this.saving.set(false);
-          this.load(piece);
+          if (piece) void this.router.navigate(['/devis', piece]);
+          else void this.router.navigate(['/devis']);
         },
         error: (err) => {
           this.saving.set(false);
           this.error.set(err?.message || 'Enregistrement impossible');
         },
       });
+    } else {
+      const piece = this.piece();
+      if (!piece) return;
+      this.devisApi
+        .update(piece, {
+          ...(this.reference.trim() ? { reference: this.reference.trim() } : { reference: '' }),
+          ...(this.date ? { date: this.date } : {}),
+          lignes,
+        })
+        .subscribe({
+          next: () => {
+            this.saving.set(false);
+            this.load(piece);
+          },
+          error: (err) => {
+            this.saving.set(false);
+            this.error.set(err?.message || 'Enregistrement impossible');
+          },
+        });
     }
   }
 

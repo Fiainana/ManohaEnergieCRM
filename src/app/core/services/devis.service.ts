@@ -29,7 +29,8 @@ export class DevisService {
       map((res) => {
         if (!res.success || !res.data) throw new Error(res.message || 'Impossible de charger les devis');
         return this.normalizeList(res.data);
-      })
+      }),
+      catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
 
@@ -40,7 +41,8 @@ export class DevisService {
         map((res) => {
           if (!res.success || !res.data) throw new Error(res.message || 'Devis introuvable');
           return this.normalizeDetail(res.data);
-        })
+        }),
+        catchError((err) => throwError(() => new Error(this.readError(err))))
       );
   }
 
@@ -49,7 +51,8 @@ export class DevisService {
       map((res) => {
         if (!res.success) throw new Error(res.message || 'Création devis impossible');
         return this.pickPiece(res.data);
-      })
+      }),
+      catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
 
@@ -60,7 +63,8 @@ export class DevisService {
         map((res) => {
           if (!res.success) throw new Error(res.message || 'Mise à jour devis impossible');
           return this.pickPiece(res.data) || numeroPiece;
-        })
+        }),
+        catchError((err) => throwError(() => new Error(this.readError(err))))
       );
   }
 
@@ -68,27 +72,29 @@ export class DevisService {
     return this.http.delete<ApiResponse<unknown>>(`${this.base}/${encodeURIComponent(numeroPiece)}`).pipe(
       map((res) => {
         if (!res.success) throw new Error(res.message || 'Annulation impossible');
-      })
+      }),
+      catchError((err) => throwError(() => new Error(this.readError(err))))
     );
   }
 
   facturer(numeroPiece: string) {
-    return this.http
-      .post<ApiResponse<Record<string, unknown>>>(`${this.base}/facturer`, { numeroPiece })
-      .pipe(
-        map((res) => {
-          if (!res.success) throw new Error(res.message || 'Facturation impossible');
-          return res.data;
-        }),
-        catchError((err: HttpErrorResponse) => {
-          const msg =
-            err.status === 403
-              ? err.error?.message ||
-                'Validation administrateur requise (encours, seuil ou remise).'
-              : err.error?.message || err.message || 'Facturation impossible';
-          return throwError(() => new Error(msg));
-        })
-      );
+    return this.http.post<ApiResponse<Record<string, unknown>>>(`${this.base}/facturer`, { numeroPiece }).pipe(
+      map((res) => {
+        if (!res.success) throw new Error(res.message || 'Facturation impossible');
+        return res.data;
+      }),
+      catchError((err) => throwError(() => new Error(this.readError(err))))
+    );
+  }
+
+  private readError(err: unknown): string {
+    const http = err as HttpErrorResponse;
+    const body = http?.error as ApiResponse | undefined;
+    if (body?.errors?.length) return body.errors.join(' · ');
+    if (body?.message) return body.message;
+    if (body?.detail) return body.detail;
+    if (typeof http?.error === 'string' && http.error.trim()) return http.error;
+    return http?.message || 'Erreur API devis';
   }
 
   private normalizeList(raw: Record<string, unknown>): DevisListResult {
@@ -142,11 +148,7 @@ export class DevisService {
     if (!data) return '';
     const entete = (data['entete'] || data['Entete'] || data) as Record<string, unknown>;
     return String(
-      data['numeroPiece'] ||
-        data['NumeroPiece'] ||
-        entete['numeroPiece'] ||
-        entete['NumeroPiece'] ||
-        ''
+      data['numeroPiece'] || data['NumeroPiece'] || entete['numeroPiece'] || entete['NumeroPiece'] || ''
     );
   }
 }

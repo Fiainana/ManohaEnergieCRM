@@ -84,9 +84,9 @@
             <tr>
               <th>Article</th>
               <th class="num">Qté</th>
-              <th class="num">PU (Ar)</th>
+              <th class="num">PU TTC (Ar)</th>
               <th class="num">Remise %</th>
-              <th class="num">Sous-total</th>
+              <th class="num">Total TTC</th>
               <th></th>
             </tr>
           </thead>
@@ -100,9 +100,11 @@
                   </div>
                 </td>
                 <td class="num"><input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" /></td>
-                <td class="num"><input type="number" min="0" step="1" [(ngModel)]="l.prixUnitaire" /></td>
+                <td class="num locked">
+                  {{ l.prixUnitaire != null ? (l.prixUnitaire | number: '1.0-0') + ' Ar' : '—' }}
+                </td>
                 <td class="num"><input type="number" min="0" max="100" step="0.1" [(ngModel)]="l.remise" /></td>
-                <td class="num strong">{{ lineHt(l) | number: '1.0-0' }} Ar</td>
+                <td class="num strong">{{ lineTtc(l) | number: '1.0-0' }} Ar</td>
                 <td><button type="button" class="linkish" (click)="removeLine($index)">×</button></td>
               </tr>
             }
@@ -112,7 +114,7 @@
       </div>
 
       <aside class="totals">
-        <div><span>Montant HT</span><strong>{{ totalHt() | number: '1.0-0' }} Ar</strong></div>
+        <div><span>Total TTC</span><strong>{{ totalTtc() | number: '1.0-0' }} Ar</strong></div>
       </aside>
     </section>
   }
