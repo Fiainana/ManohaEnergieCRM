@@ -11,8 +11,6 @@ interface LineDraft {
   designation: string;
   refFournisseur: string;
   quantite: number;
-  prixEstime: number | null;
-  devise: string;
 }
 
 @Component({
@@ -42,9 +40,7 @@ export class DemandeDevisImportFormComponent {
   fournisseur = '';
   paysOrigine = '';
   note = '';
-  lines: LineDraft[] = [
-    { designation: '', refFournisseur: '', quantite: 1, prixEstime: null, devise: 'EUR' },
-  ];
+  lines: LineDraft[] = [{ designation: '', refFournisseur: '', quantite: 1 }];
 
   constructor() {
     this.clientSearch$
@@ -53,7 +49,6 @@ export class DemandeDevisImportFormComponent {
   }
 
   onClientType(): void {
-    // Saisie libre : on garde ce que l'utilisateur tape comme valeur envoyée
     this.clientNumero = this.clientQuery.trim();
     this.clientLabel = '';
     this.clientSearch$.next(this.clientQuery.trim());
@@ -84,10 +79,7 @@ export class DemandeDevisImportFormComponent {
   }
 
   addLine(): void {
-    this.lines = [
-      ...this.lines,
-      { designation: '', refFournisseur: '', quantite: 1, prixEstime: null, devise: 'EUR' },
-    ];
+    this.lines = [...this.lines, { designation: '', refFournisseur: '', quantite: 1 }];
   }
 
   removeLine(i: number): void {
@@ -102,8 +94,8 @@ export class DemandeDevisImportFormComponent {
         designation: l.designation.trim(),
         refFournisseur: l.refFournisseur.trim() || null,
         quantite: Number(l.quantite),
-        prixEstime: l.prixEstime != null && l.prixEstime > 0 ? Number(l.prixEstime) : null,
-        devise: l.devise.trim() || null,
+        prixEstime: null,
+        devise: null,
       }));
 
     if (lignes.length === 0) {

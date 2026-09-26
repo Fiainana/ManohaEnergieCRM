@@ -9,7 +9,8 @@
   </header>
 
   <p class="hint text-muted">
-    Demande hors Sage pour suivre un devis fournisseur à l'importation (pays, prix estimés).
+    Demande hors Sage pour suivre un devis fournisseur à l'importation.
+    Le prix sera renseigné par l'admin après confirmation du fournisseur.
     Statut initial : <strong>Brouillon</strong> — envoyez-la ensuite depuis la fiche.
   </p>
 
@@ -74,8 +75,6 @@
           <th>Désignation *</th>
           <th>Réf. fournisseur</th>
           <th class="num">Qté *</th>
-          <th class="num">Prix estimé</th>
-          <th>Devise</th>
           <th></th>
         </tr>
       </thead>
@@ -90,12 +89,6 @@
             </td>
             <td class="num">
               <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />
-            </td>
-            <td class="num">
-              <input type="number" min="0" step="0.01" [(ngModel)]="l.prixEstime" placeholder="—" />
-            </td>
-            <td>
-              <input [(ngModel)]="l.devise" maxlength="8" placeholder="EUR" style="width: 4.5rem" />
             </td>
             <td>
               <button type="button" class="linkish" (click)="removeLine($index)">×</button>

@@ -102,7 +102,6 @@
             <th>Désignation</th>
             <th>Réf. four.</th>
             <th class="num">Qté</th>
-            <th class="num">Prix estimé</th>
             <th class="num">Prix four.</th>
             <th>Devise</th>
             <th>Délai</th>
@@ -114,9 +113,6 @@
               <td><strong>{{ l.designation || '—' }}</strong></td>
               <td class="mono">{{ l.refFournisseur || '—' }}</td>
               <td class="num">{{ l.quantite | number: '1.0-2' }}</td>
-              <td class="num">
-                {{ l.prixEstime != null ? (l.prixEstime | number: '1.0-2') : '—' }}
-              </td>
               <td class="num strong">
                 {{ l.prixFournisseur != null ? (l.prixFournisseur | number: '1.0-2') : '—' }}
               </td>
