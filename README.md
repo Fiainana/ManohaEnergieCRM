@@ -7,7 +7,7 @@ Front Angular 22 — CRM commercial pour Manoha Énergie.
 ## Prérequis
 
 - Node.js 20+
-- API backend démarrée (`http://localhost:5063`)
+- Accès à l'API : `https://api.manoha-energie.online`
 
 ## Démarrage
 
@@ -18,9 +18,11 @@ ng serve
 
 Ouvrez http://localhost:4200/ → page de connexion.
 
-## Authentification
+## API
 
-- Endpoint : `POST /api/auth/login` (`{ login, password }`)
+- Base URL : `https://api.manoha-energie.online/api`
+- Swagger : https://api.manoha-energie.online/swagger/index.html
+- Auth : `POST /api/Auth/login` (`{ login, password }`)
 - JWT stocké en localStorage, injecté via interceptor
 - Routes protégées par `authGuard`
 
