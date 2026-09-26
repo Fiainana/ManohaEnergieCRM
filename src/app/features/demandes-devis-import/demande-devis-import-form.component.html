@@ -1,0 +1,86 @@
+<div class="odo-form">
+  <a routerLink="/demandes-devis-import" class="back">← Demandes de devis import</a>
+
+  <header class="statusbar">
+    <div>
+      <p class="eyebrow">Importation</p>
+      <h1>Nouvelle demande de devis import</h1>
+    </div>
+  </header>
+
+  <p class="hint text-muted">
+    Demande hors Sage pour suivre un devis fournisseur à l'importation (pays, prix estimés).
+    Statut initial : <strong>Brouillon</strong> — envoyez-la ensuite depuis la fiche.
+  </p>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  <section class="sheet">
+    <div class="form-grid">
+      <label class="field">
+        <span>Fournisseur</span>
+        <input [(ngModel)]="fournisseur" maxlength="100" placeholder="Nom du fournisseur" />
+      </label>
+      <label class="field">
+        <span>Pays d'origine</span>
+        <input [(ngModel)]="paysOrigine" maxlength="60" placeholder="ex. Chine, France…" />
+      </label>
+      <label class="field">
+        <span>N° client Sage (optionnel)</span>
+        <input [(ngModel)]="clientNumero" maxlength="17" placeholder="CT_Num" class="mono" />
+      </label>
+      <label class="field field--full">
+        <span>Note</span>
+        <textarea [(ngModel)]="note" rows="2" maxlength="500" placeholder="Contexte, urgence…"></textarea>
+      </label>
+    </div>
+
+    <h2 class="sheet__title">Lignes</h2>
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>Désignation *</th>
+          <th>Réf. fournisseur</th>
+          <th class="num">Qté *</th>
+          <th class="num">Prix estimé</th>
+          <th>Devise</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of lines; track $index) {
+          <tr>
+            <td>
+              <input [(ngModel)]="l.designation" maxlength="120" placeholder="Désignation article" />
+            </td>
+            <td>
+              <input [(ngModel)]="l.refFournisseur" maxlength="50" placeholder="Réf." />
+            </td>
+            <td class="num">
+              <input type="number" min="0.0001" step="0.01" [(ngModel)]="l.quantite" />
+            </td>
+            <td class="num">
+              <input type="number" min="0" step="0.01" [(ngModel)]="l.prixEstime" placeholder="—" />
+            </td>
+            <td>
+              <input [(ngModel)]="l.devise" maxlength="8" placeholder="EUR" style="width: 4.5rem" />
+            </td>
+            <td>
+              <button type="button" class="linkish" (click)="removeLine($index)">×</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <button type="button" class="linkish add" (click)="addLine()">+ Ajouter une ligne</button>
+
+    <div class="actions">
+      <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Enregistrement…' : 'Créer le brouillon' }}
+      </button>
+      <a routerLink="/demandes-devis-import" class="btn btn--ghost">Annuler</a>
+    </div>
+  </section>
+</div>

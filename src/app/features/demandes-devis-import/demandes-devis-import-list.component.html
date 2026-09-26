@@ -1,0 +1,96 @@
+<div class="page">
+  <header class="page__header">
+    <div>
+      <p class="eyebrow">Importation</p>
+      <h1>Demandes de devis import</h1>
+      <p class="text-muted page__count">
+        @if (loading() && items().length === 0) {
+          Chargement…
+        } @else {
+          {{ total() }} demande{{ total() > 1 ? 's' : '' }}
+        }
+      </p>
+    </div>
+    <a routerLink="/demandes-devis-import/nouveau" class="btn btn--primary">+ Nouvelle demande</a>
+  </header>
+
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__field">
+        <label for="ddi-statut">Statut</label>
+        <select id="ddi-statut" [(ngModel)]="statut" (ngModelChange)="onFilterChange()">
+          @for (s of statuts; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+      @if (auth.isAdmin()) {
+        <label class="filters__check">
+          <input type="checkbox" [(ngModel)]="scopeAll" (ngModelChange)="onFilterChange()" />
+          Toutes les demandes
+        </label>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert--error" role="alert">{{ error() }}</div>
+  }
+
+  <div class="odo-sheet">
+    @if (loading() && items().length === 0) {
+      <p class="empty text-muted">Chargement des demandes…</p>
+    } @else if (items().length === 0) {
+      <div class="empty">
+        <p class="empty__title">Aucune demande de devis import</p>
+        <p class="text-muted">Créez une demande ou changez le filtre de statut.</p>
+        <a routerLink="/demandes-devis-import/nouveau" class="btn btn--primary">Nouvelle demande</a>
+      </div>
+    } @else {
+      <table class="odo-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Fournisseur</th>
+            <th>Pays</th>
+            <th>Client</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of items(); track d.id) {
+            <tr [routerLink]="['/demandes-devis-import', d.id]">
+              <td class="strong">{{ d.id }}</td>
+              <td>{{ d.createdAt ? (d.createdAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+              <td>
+                <span class="badge" [class]="statutClass(d.statut)">
+                  {{ statutLabel(d.statut) }}
+                </span>
+              </td>
+              <td>{{ d.fournisseur || '—' }}</td>
+              <td>{{ d.paysOrigine || '—' }}</td>
+              <td class="mono">{{ d.clientNumero || '—' }}</td>
+              <td class="note text-muted">{{ d.note || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer class="pager">
+        <button class="btn btn--ghost btn--sm" type="button" (click)="load(page() - 1)" [disabled]="page() <= 1">
+          Précédent
+        </button>
+        <span>page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <button
+          class="btn btn--ghost btn--sm"
+          type="button"
+          (click)="load(page() + 1)"
+          [disabled]="page() >= totalPages()"
+        >
+          Suivant
+        </button>
+      </footer>
+    }
+  </div>
+</div>
