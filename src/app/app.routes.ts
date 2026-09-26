@@ -16,6 +16,9 @@ import { UsersPageComponent } from './features/users/users-page.component';
 import { DemandesAchatListComponent } from './features/demandes-achat/demandes-achat-list.component';
 import { DemandeAchatFormComponent } from './features/demandes-achat/demande-achat-form.component';
 import { DemandeAchatDetailComponent } from './features/demandes-achat/demande-achat-detail.component';
+import { DemandesDevisImportListComponent } from './features/demandes-devis-import/demandes-devis-import-list.component';
+import { DemandeDevisImportFormComponent } from './features/demandes-devis-import/demande-devis-import-form.component';
+import { DemandeDevisImportDetailComponent } from './features/demandes-devis-import/demande-devis-import-detail.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -49,6 +52,21 @@ export const routes: Routes = [
       {
         path: 'demandes-achat/:id',
         component: DemandeAchatDetailComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
+      {
+        path: 'demandes-devis-import',
+        component: DemandesDevisImportListComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
+      {
+        path: 'demandes-devis-import/nouveau',
+        component: DemandeDevisImportFormComponent,
+        canActivate: [roleGuard('Commercial', 'Admin')],
+      },
+      {
+        path: 'demandes-devis-import/:id',
+        component: DemandeDevisImportDetailComponent,
         canActivate: [roleGuard('Commercial', 'Admin')],
       },
       { path: 'utilisateurs', component: UsersPageComponent, canActivate: [roleGuard('Admin')] },
