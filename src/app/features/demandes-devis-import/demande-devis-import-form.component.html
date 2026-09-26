@@ -19,6 +19,40 @@
 
   <section class="sheet">
     <div class="form-grid">
+      <label class="field field--client">
+        <span>Client Sage (optionnel)</span>
+        @if (clientNumero && clientLabel) {
+          <div class="picked">
+            <strong>{{ clientLabel }}</strong>
+            <small>{{ clientNumero }}</small>
+            <button type="button" class="linkish" (click)="clearClient()">changer</button>
+          </div>
+        } @else {
+          <input
+            [(ngModel)]="clientQuery"
+            (ngModelChange)="onClientType()"
+            placeholder="Rechercher un client… ou saisir librement"
+            autocomplete="off"
+          />
+          @if (clientQuery.trim().length >= 2) {
+            <ul class="suggest suggest--clients">
+              @for (c of clientHits(); track c.numero) {
+                <li>
+                  <button type="button" (click)="pickClient(c)">
+                    <strong>{{ c.intitule }}</strong>
+                    <small>{{ c.numero }}@if (c.ville) { · {{ c.ville }} }</small>
+                  </button>
+                </li>
+              }
+              <li class="suggest__free">
+                <button type="button" class="free-opt" (click)="useFreeText()">
+                  Utiliser « {{ clientQuery.trim() }} » tel quel
+                </button>
+              </li>
+            </ul>
+          }
+        }
+      </label>
       <label class="field">
         <span>Fournisseur</span>
         <input [(ngModel)]="fournisseur" maxlength="100" placeholder="Nom du fournisseur" />
@@ -26,10 +60,6 @@
       <label class="field">
         <span>Pays d'origine</span>
         <input [(ngModel)]="paysOrigine" maxlength="60" placeholder="ex. Chine, France…" />
-      </label>
-      <label class="field">
-        <span>N° client Sage (optionnel)</span>
-        <input [(ngModel)]="clientNumero" maxlength="17" placeholder="CT_Num" class="mono" />
       </label>
       <label class="field field--full">
         <span>Note</span>
