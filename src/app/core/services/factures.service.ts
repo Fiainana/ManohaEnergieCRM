@@ -145,7 +145,7 @@ export class FacturesService {
     >[];
     return {
       page: Number(bag['page'] ?? bag['Page'] ?? 1),
-      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? rows.length || 25),
+      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? (rows.length || 25)),
       total: Number(bag['total'] ?? bag['Total'] ?? rows.length),
       totalPages: Number(bag['totalPages'] ?? bag['TotalPages'] ?? (rows.length ? 1 : 0)),
       items: rows.map((r) => this.normalizeEntete(r)),

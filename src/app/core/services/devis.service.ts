@@ -177,7 +177,7 @@ export class DevisService {
     const items = this.pickRows(raw).map((row) => this.normalizeEntete(row));
     return {
       page: Number(bag['page'] ?? bag['Page'] ?? 1),
-      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? items.length || 25),
+      pageSize: Number(bag['pageSize'] ?? bag['PageSize'] ?? (items.length || 25)),
       total: Number(bag['total'] ?? bag['Total'] ?? items.length),
       totalPages: Number(bag['totalPages'] ?? bag['TotalPages'] ?? (items.length ? 1 : 0)),
       items,
