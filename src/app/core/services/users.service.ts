@@ -8,7 +8,8 @@ import { CreateUserAppRequest, UserApp } from '../models/user-app.model';
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/users`;
+  /** Admin CRUD — API : GET|POST /api/admin/users (pas /api/users qui ne fait que /me) */
+  private readonly base = `${environment.apiUrl}/admin/users`;
 
   list() {
     return this.http.get<ApiResponse<UserApp[] | Record<string, unknown>>>(this.base).pipe(
